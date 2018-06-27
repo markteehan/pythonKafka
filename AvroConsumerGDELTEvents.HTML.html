@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<svg width="960" height="960" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
+<script src="jquery.min.js"></script>
+<script src="kafkaRestHelper.js"></script>
+
+
+<script>
+
+base_uri= "http://localhost:8082/consumers/"
+console.log("base uri is "+base_uri)
+//base_uri= "http://10.0.0.4:8082/consumers/"
+topic="gdeltEvent"
+topic="avrotest"
+
+
+function createConsumerInstanceAvro(groupname, callbackfunction) {
+  // Consumer Instance not created, create one
+
+  var       vMethod = 'POST'
+  var vContent_Type = "application/vnd.kafka.v2+json"
+        var vAccept = ""
+           var vUri = base_uri + groupname
+          var vData = '{     "format": "avro", "auto.offset.reset": "smallest","auto.commit.enable":"false"  }'
+
+  console.log("(I) createConsumerInstanceAvro: Creating new Consumer Instance for "+groupname+" using "+vUri+" and " + vData)
+
+  var jqxhr = $.ajax({
+           method: vMethod
+    ,         url: vUri
+    , contentType: vContent_Type
+    ,        data: vData
+  })
+  .done(function(data) {
+    console.log("(I) createConsumerInstanceAvro: New consumer created " + data["base_uri"])
+    consumerinstance = data["base_uri"]
+    // Take the consumer instance out of the URI
+    consumerinstancesArray = consumerinstance.split("/")
+    consumerinstance = consumerinstancesArray[consumerinstancesArray.length - 1]
+    console.log("(I) createConsumerInstanceAvro: New consumer parsed " + consumerinstance)
+    callbackfunction(consumerinstance, groupname, createConsumerSubscriptionAvro)
+  })
+  .fail(function(data) {
+    console.log("(E) createConsumerInstanceAvro: Error creating Consumer Instance:\n")
+    console.log("Do a delete here?")
+    console.dir(data)
+  });
+}
+
+
+
+
+
+
+
+
+function createConsumerSubscriptionAvro(consumerInstance, groupName, callbackfunction) {
+  console.log("(I) createConsumerSubscriptionAvro: Creating new consumer subscription for consumer Instance "+consumerInstance )
+
+  var       vMethod = 'POST'
+  var vContent_Type = "application/vnd.kafka.v2+json"
+        var vAccept = ""
+           var vUri = base_uri + groupName + "/instances/"+consumerInstance+"/subscription"
+           var vData = '{"topics":["'+topic+'"]}'
+               //, contentType: vContent_Type
+
+  var jqxhr = $.ajax({
+           method: vMethod
+    ,         uri: vUri
+    ,        data: vData
+  })
+  .done(function(data) {
+    console.log("(I) createConsumerSubscriptionAvro: subscribed consumer subscription using "+base_uri + groupName + "/instances/"+consumerInstance+"/subscription" )
+    callbackfunction(consumerInstance, groupName, startConsuming)
+  })
+  .fail(function(data) {
+    console.log("(E) createConsumerSubscriptionAvro: Error creating Consumer Instance:\n")
+    console.dir(data)
+  });
+}
+
+
+
+
+
+
+
+
+
+
+function startConsuming(consumerInstance, groupName, callbackfunction) {
+  console.log("(I) startConsuming: Starting callback function startConsuming at 500 second intervals for "+groupName)
+  setInterval(function() {
+    runConsume(consumerInstance, groupName);
+  }, 5000);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function runConsume(consumerInstance, groupName) {
+     var       vMethod = 'GET'
+        //beforeSend: function (xhr){
+        //              xhr.setRequestHeader("Content-Type","application/vnd.kafka.avro.v2+json");
+        // xhr.setRequestHeader("Accept","application/vnd.kafka.avro.v2+json");
+
+  var jqxhr = $.ajax({
+           type: "GET"
+           ,url: base_uri + groupName + "/instances/"+consumerInstance+"/records"
+           ,headers: {
+                           Accept: "application/vnd.kafka.avro.v2+json"
+                    //, ContentType: "application/vnd.kafka.avro.v2+json"
+                     }
+  })
+  .done(function(data) {
+    console.log("Consumed some data of some size ")
+    //console.dir(data)
+    //callbackfunction(consumerInstance, groupName, startConsuming)
+  })
+  .fail(function(data) {
+    console.log("(E) createConsumerSubscriptionAvro: Error pulling from Consumer Instance:\n")
+    console.dir(data)
+  });
+}
+
+console.log("step 1: create Consumer Instance for my_consumer_instance")
+createConsumerInstanceAvro("my_consumer_instance", createConsumerSubscriptionAvro)
+
+</script>
