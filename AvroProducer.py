@@ -56,7 +56,7 @@ def setupTopic_gdeltEvent(server,schema_registry_url):
   schema_values_str="""
   {"namespace": "gdelt.event.avro",
   "type": "record",
-  "name": "gdeltEvent5",
+  "name": "gdeltEvent6",
   "fields": [
      {"name": "EventId" ,"type": ["null","string"],"default":null}
     ,{"name": "Day" ,"type": ["null","string"],"default":null}
@@ -482,7 +482,7 @@ def load(datafile, schema, server):
           , 'DateAdded':match.group('DateAdded')
           , 'SourceUrl':match.group('SourceUrl')
         }
-             Produce_gdeltEvent("gdeltEvent5",data,'{"gdeltEvent5_key":"'+str(match.group('EventId')+'"}'))
+             Produce_gdeltEvent("gdeltEvent6",data,'{"gdeltEvent6_key":"'+str(match.group('EventId')+'"}'))
              avroProducer_gdeltEvent.flush()
           else:
            print("NotMatch : ",row)
