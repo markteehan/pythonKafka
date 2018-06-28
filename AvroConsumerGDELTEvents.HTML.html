@@ -9,23 +9,35 @@
 base_uri= "http://localhost:8082/consumers/"
 console.log("base uri is "+base_uri)
 //base_uri= "http://10.0.0.4:8082/consumers/"
-topic="gdeltEvent6"
 //org.apache.kafka.common.config.ConfigException: Invalid value smallest for configuration auto.offset.reset: String must be one of: latest, earliest, none
-AutoOffsetReset="earliest"
+
 fetchOnce=0
-consumerInstanceName="MyC02"
+AutoOffsetReset="earliest"
+
+//#consumerInstanceName="MyC02"
+//#topic="gdeltEvent6"
+//#format="avro"
+
+//# Test S03
+consumerInstanceName="MyC04"
+topic="curlRESTjson"
+format="json"
+api="v1"
 
 
-function createConsumerInstanceAvro(groupname, callbackfunction) {
+
+function createConsumerInstance(groupname, pFormat, pApi, callbackfunction) {
   // Consumer Instance not created, create one
 
+
   var       vMethod = 'POST'
-  var vContent_Type = "application/vnd.kafka.v2+json"
+  var vContent_Type = "application/vnd.kafka."+pApi+"+json"
         var vAccept = ""
            var vUri = base_uri + groupname
-          var vData = '{     "format": "avro", "auto.offset.reset": "'+AutoOffsetReset+'","auto.commit.enable":"false"  }'
+          var vData = '{     "format": "'+pFormat+'", "auto.offset.reset": "'+AutoOffsetReset+'","auto.commit.enable":"false"  }'
 
-  console.log("(I) createConsumerInstanceAvro: Creating new Consumer Instance for "+groupname+" using "+vUri+" and " + vData)
+
+  console.log("(I) createConsumerInstance: Creating new "+pFormat+" Consumer Instance for "+groupname+" using "+vContent_Type+' and '+vUri+" and " + vData)
 
   var jqxhr = $.ajax({
            method: vMethod
@@ -34,16 +46,16 @@ function createConsumerInstanceAvro(groupname, callbackfunction) {
     ,        data: vData
   })
   .done(function(data) {
-    console.log("(I) createConsumerInstanceAvro: New consumer created:, returned " + data["base_uri"])
+    console.log("(I) createConsumerInstance: New consumer created:, returned " + data["base_uri"])
     consumerinstance = data["base_uri"]
     // Take the consumer instance out of the URI
     consumerinstancesArray = consumerinstance.split("/")
     consumerinstance = consumerinstancesArray[consumerinstancesArray.length - 1]
-    console.log("(I) createConsumerInstanceAvro: New consumer parsed " + consumerinstance)
-    callbackfunction(consumerinstance, groupname, createConsumerSubscriptionAvro)
+    console.log("(I) createConsumerInstance: New consumer parsed " + consumerinstance)
+    callbackfunction(consumerinstance, groupname, pFormat, v2_createConsumerSubscription)
   })
   .fail(function(data) {
-    console.log("(E) createConsumerInstanceAvro: Error creating Consumer Instance:\n")
+    console.log("(E) createConsumerInstance: Error creating Consumer Instance:\n")
     console.log("Do a delete here?")
     console.dir(data)
   });
@@ -53,43 +65,76 @@ function createConsumerInstanceAvro(groupname, callbackfunction) {
 
 
 
+function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfunction) {
+  console.log("(I) v1_getTopicRecords: Dequeueing for "+consumerInstance )
+  var       vMethod = 'GET'
+
+  if (fetchOnce==0) {
+      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
+      $.ajax({
+                  method: "GET"
+               ,dataType:"json"
+               ,   async:"false"
+               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/"
+               , headers: {
+                               Accept: "application/vnd.kafka."+pFormat+".v1+json"
+                          }
+      })
+      .done(function(data) {
+        console.log("(I) v1_getTopicRecords: Consumed some "+pFormat+" data of some size ")
+        if (data.length == 0) {
+          console.log("(I) v1_getTopicRecords: NO data returned!")
+        }
+        if (data.length != 0) {
+          console.log(data.length)
+          console.log(JSON.stringify(data))
+          //console.log(data[1].value)
+          //var jsonObjects = []
+          //for(var i = 0; i < data.length; i++) {
+            //console.log(data[i].value)
+            //var jsonObject = JSON.parse(decodedValue)
+            // Add the item count for D3.js to have a single number per row
+            //jsonObject['itemcount'] = 1
+            //jsonObjects.push(jsonObject)
+          //}
+          }
+      })
+      .fail(function(data) {
+        console.log("(E) v1_getTopicRecords: Error pulling from Consumer Instance:\n")
+        console.dir(data)
+      });
+      fetchOnce=1;
+    }
+
+  }
 
 
 
-function createConsumerSubscriptionAvro(consumerInstance, groupName, callbackfunction) {
-  console.log("(I) createConsumerSubscriptionAvro: Creating new consumer subscription for consumer Instance "+consumerInstance )
+
+
+function v2_createConsumerSubscription(consumerInstance, groupName, pFormat, callbackfunction) {
+  console.log("(I) createConsumerSubscription: Creating new consumer subscription for consumer Instance "+consumerInstance )
 
   var       vMethod = 'POST'
-  var       vType = 'POST'
-  var vContent_Type = "application/vnd.kafka.v2+json"
-        var vAccept = ""
+  var vContent_Type = "application/vnd.kafka.v1+json"
            var vUrl = base_uri + groupName + "/instances/"+consumerInstance+"/subscription/"
            var vData = '{\"topics\":[\"'+topic+'\"]}'
-               //, contentType: vContent_Type
-  console.log("(I) createConsumerSubscriptionAvro: about to call "+vUrl+" for topic "+vData )
 
-  // Create consumer instance
-  //var jqxhr = $.ajax({
-  //  type: "POST",
-  //  data: "{\"format\": \"binary\"}",
-  //  url:base_uri + groupname,
-  //  contentType: "application/vnd.kafka.v1+json"
-  //})
+  console.log("(I) createConsumerSubscription: about to call "+vUrl+" for topic "+vData )
 
-
-  var jqxhr = $.ajax({
-             type: vType
+  $.ajax({
+           method: vMethod
     ,         url: vUrl
-    ,data: "{\"topics\": [\"gdeltEvent6\"]}"
+    ,        data: "{\"topics\": [\"gdeltEvent6\"]}"
    // ,data:vData
-    ,contentType: "application/vnd.kafka.v2+json"
+    ,contentType: "application/vnd.kafka.v1+json"
   })
   .done(function(data) {
-    console.log("(I) createConsumerSubscriptionAvro: subscribed consumer subscription using "+base_uri + groupName + "/instances/"+consumerInstance+"/subscription" )
-    callbackfunction(consumerInstance, groupName, startConsuming)
+    console.log("(I) createConsumerSubscription: subscribed consumer subscription using "+base_uri + groupName + "/instances/"+consumerInstance+"/subscription" )
+    callbackfunction(consumerInstance, groupName,pFormat,  v2_startConsuming)
   })
   .fail(function(data) {
-    console.log("(E) createConsumerSubscriptionAvro: Error creating Consumer Instance:\n")
+    console.log("(E) createConsumerSubscription: Error creating Consumer Instance:\n")
     console.dir(data)
   });
 }
@@ -103,10 +148,10 @@ function createConsumerSubscriptionAvro(consumerInstance, groupName, callbackfun
 
 
 
-function startConsuming(consumerInstance, groupName, callbackfunction) {
+function v2_startConsuming(consumerInstance, groupName, pFormat, callbackfunction) {
   console.log("(I) startConsuming: Starting callback function startConsuming  for "+groupName)
   //setInterval(function() {
-    runConsume(consumerInstance, groupName);
+    v2_runConsume(consumerInstance, groupName,pFormat);
     console.log("(I) startConsuming: Finished callback function startConsuming  for "+groupName)
   //}, 5000);
 }
@@ -116,13 +161,7 @@ function startConsuming(consumerInstance, groupName, callbackfunction) {
 
 
 
-
-
-
-
-
-
-function runConsume(consumerInstance, groupName) {
+function v2_runConsume(consumerInstance, groupName,pFormat) {
      var       vMethod = 'GET'
         //beforeSend: function (xhr){
         //              xhr.setRequestHeader("Content-Type","application/vnd.kafka.avro.v2+json");
@@ -130,18 +169,17 @@ function runConsume(consumerInstance, groupName) {
 
   if (fetchOnce==0) {
       console.log("(I) runConsumer : attempting to consume some data of some size ")
-      var jqxhr = $.ajax({
-               type: "GET"
-               ,url: base_uri + groupName + "/instances/"+consumerInstance+"/records"
-               ,headers: {
-                               Accept: "application/vnd.kafka.avro.v2+json"
-                        //, ContentType: "application/vnd.kafka.avro.v2+json"
-                         }
+      $.ajax({
+                  method: "GET"
+               ,dataType:"json"
+               ,   async:"false"
+               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/records"
+               , headers: {
+                               Accept: "application/vnd.kafka."+pFormat+".v2+json"
+                          }
       })
       .done(function(data) {
-        console.log("(I) runConsume: Consumed some data of some size ")
-        //console.log("Consumed ");
-        console.dir(data)
+        console.log("(I) runConsume: Consumed some "+pFormat+" data of some size ")
         if (data.length == 0) {
           console.log("NO data returned!")
         }
@@ -157,14 +195,23 @@ function runConsume(consumerInstance, groupName) {
           }
       })
       .fail(function(data) {
-        console.log("(E) createConsumerSubscriptionAvro: Error pulling from Consumer Instance:\n")
+        console.log("(E) createConsumerSubscription: Error pulling from Consumer Instance:\n")
         console.dir(data)
       });
       fetchOnce=1;
     }
 }
 
-console.log("step 1: create Consumer Instance for my_consumer_instance")
-createConsumerInstanceAvro(consumerInstanceName, createConsumerSubscriptionAvro)
+console.log("step 1: create Consumer Instance  "+consumerInstanceName+" format "+format)
+if (api == "v1") {
+    AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
+    createConsumerInstance(consumerInstanceName,format, api, v1_getTopicRecords)
+    }
+    else {
+      createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
+    }
+
+
+
 
 </script>
