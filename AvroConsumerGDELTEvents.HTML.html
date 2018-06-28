@@ -13,6 +13,7 @@ topic="gdeltEvent6"
 //org.apache.kafka.common.config.ConfigException: Invalid value smallest for configuration auto.offset.reset: String must be one of: latest, earliest, none
 AutoOffsetReset="earliest"
 fetchOnce=0
+consumerInstanceName="MyC02"
 
 
 function createConsumerInstanceAvro(groupname, callbackfunction) {
@@ -62,10 +63,10 @@ function createConsumerSubscriptionAvro(consumerInstance, groupName, callbackfun
   var       vType = 'POST'
   var vContent_Type = "application/vnd.kafka.v2+json"
         var vAccept = ""
-           var vUri = base_uri + groupName + "/instances/"+consumerInstance+"/subscription/"
+           var vUrl = base_uri + groupName + "/instances/"+consumerInstance+"/subscription/"
            var vData = '{\"topics\":[\"'+topic+'\"]}'
                //, contentType: vContent_Type
-  console.log("(I) createConsumerSubscriptionAvro: about to call "+vUri+" for topic "+vData )
+  console.log("(I) createConsumerSubscriptionAvro: about to call "+vUrl+" for topic "+vData )
 
   // Create consumer instance
   //var jqxhr = $.ajax({
@@ -78,7 +79,7 @@ function createConsumerSubscriptionAvro(consumerInstance, groupName, callbackfun
 
   var jqxhr = $.ajax({
              type: vType
-    ,         url: vUri
+    ,         url: vUrl
     ,data: "{\"topics\": [\"gdeltEvent6\"]}"
    // ,data:vData
     ,contentType: "application/vnd.kafka.v2+json"
@@ -164,6 +165,6 @@ function runConsume(consumerInstance, groupName) {
 }
 
 console.log("step 1: create Consumer Instance for my_consumer_instance")
-createConsumerInstanceAvro("my_consumer_instance", createConsumerSubscriptionAvro)
+createConsumerInstanceAvro(consumerInstanceName, createConsumerSubscriptionAvro)
 
 </script>
