@@ -25,6 +25,26 @@ format="json"
 api="v1"
 
 
+//# Test S04
+consumerInstanceName="MyC05"
+topic="curlRESTbinary"
+format="binary"
+api="v1"
+
+//# Test S05
+consumerInstanceName="MyC06"
+topic="curlRESTavro"
+format="avro"
+api="v1"
+
+//# Test S05
+consumerInstanceName="MyC07"
+topic="gdeltEvent6"
+format="avro"
+api="v1"
+
+
+
 
 function createConsumerInstance(groupname, pFormat, pApi, callbackfunction) {
   // Consumer Instance not created, create one
@@ -75,7 +95,7 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
                   method: "GET"
                ,dataType:"json"
                ,   async:"false"
-               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/"
+               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"?max_bytes=50"
                , headers: {
                                Accept: "application/vnd.kafka."+pFormat+".v1+json"
                           }
