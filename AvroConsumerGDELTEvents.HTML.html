@@ -40,6 +40,7 @@ api="v1"
 //# Test S05
 consumerInstanceName="MyC07"
 topic="gdeltEvent6"
+topic="gdeltsmall01"
 format="avro"
 api="v1"
 
@@ -82,51 +83,6 @@ function createConsumerInstance(groupname, pFormat, pApi, callbackfunction) {
 }
 
 
-
-
-
-function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfunction) {
-  console.log("(I) v1_getTopicRecords: Dequeueing for "+consumerInstance )
-  var       vMethod = 'GET'
-
-  if (fetchOnce==0) {
-      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
-      $.ajax({
-                  method: "GET"
-               ,dataType:"json"
-               ,   async:"false"
-               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"?max_bytes=50"
-               , headers: {
-                               Accept: "application/vnd.kafka."+pFormat+".v1+json"
-                          }
-      })
-      .done(function(data) {
-        console.log("(I) v1_getTopicRecords: Consumed some "+pFormat+" data of some size ")
-        if (data.length == 0) {
-          console.log("(I) v1_getTopicRecords: NO data returned!")
-        }
-        if (data.length != 0) {
-          console.log(data.length)
-          console.log(JSON.stringify(data))
-          //console.log(data[1].value)
-          //var jsonObjects = []
-          //for(var i = 0; i < data.length; i++) {
-            //console.log(data[i].value)
-            //var jsonObject = JSON.parse(decodedValue)
-            // Add the item count for D3.js to have a single number per row
-            //jsonObject['itemcount'] = 1
-            //jsonObjects.push(jsonObject)
-          //}
-          }
-      })
-      .fail(function(data) {
-        console.log("(E) v1_getTopicRecords: Error pulling from Consumer Instance:\n")
-        console.dir(data)
-      });
-      fetchOnce=1;
-    }
-
-  }
 
 
 
@@ -222,6 +178,70 @@ function v2_runConsume(consumerInstance, groupName,pFormat) {
     }
 }
 
+
+function stripString(pString) {
+// Convert {"string":"760689192"}   to  760689192
+// there must be a better way of doing this
+// I'm never going to win software developer of the year with this nonsense
+ vString=JSON.stringify(pString)
+ return vString
+        .replace('{"string":"'  , '')
+        .replace('"}'  , '')
+}
+
+function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfunction) {
+  console.log("(I) v1_getTopicRecords: Dequeueing for "+consumerInstance )
+  var       vMethod = 'GET'
+
+
+  if (fetchOnce==0) {
+      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
+      $.ajax({
+                  method: "GET"
+               ,   async:true
+               ,crossDomain:true
+               ,dataType:'json'
+               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+""
+               , headers: {
+                               Accept: "application/vnd.kafka."+pFormat+".v1+json"
+                          }
+      })
+      .done(function(data) {
+        console.log("(I) v1_getTopicRecords: Consumed some "+pFormat+" data of some size ")
+        if (data.length == 0) {
+          console.log("(I) v1_getTopicRecords: NO data returned!")
+        }
+
+        if (data.length != 0) {
+          for(var i = 0; i < data.length; i++)
+          {
+              var jsonObject = data[i]["value"]
+
+              console.log("doing the JSON.parse for "+JSON.stringify(jsonObject))
+
+              if (typeof jsonObject["EventId"] !== 'undefined') {
+                // value is {"string":"760689189"}
+                console.log("the event id is "+   stripString(jsonObject["EventId"])  )
+                console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
+                console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
+              }
+              else {
+                console.log("unable to find the EventID")
+              }
+          }
+        }
+      })
+      .fail(function(data) {
+        console.log("(E) v1_getTopicRecords: Error pulling from Consumer Instance:\n")
+        console.dir(data)
+      });
+      fetchOnce=1;
+    }
+
+  }
+
+
+
 console.log("step 1: create Consumer Instance  "+consumerInstanceName+" format "+format)
 if (api == "v1") {
     AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
@@ -230,8 +250,5 @@ if (api == "v1") {
     else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
-
-
-
 
 </script>
