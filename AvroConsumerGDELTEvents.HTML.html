@@ -1,6 +1,49 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>Animated Force Chart</title>
+    <script src="d3.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <style>
+        .link {
+            stroke: #2E2E2E;
+            stroke-width: 2px;
+        }
+
+        .node {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        .textClass {
+            stroke: #323232;
+            font-family: "Lucida Grande", "Droid Sans", Arial, Helvetica, sans-serif;
+            font-weight: normal;
+            stroke-width: .5;
+            font-size: 10px;
+        }
+.toolTip {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        position: absolute;
+        display: none;
+        width: auto;
+        height: auto;
+        background: none repeat scroll 0 0 white;
+        border: 0 none;
+        border-radius: 8px 8px 8px 8px;
+        box-shadow: -3px 3px 15px #888888;
+        color: black;
+        font: 12px sans-serif;
+        padding: 5px;
+        text-align: center;
+    }
+
+    </style>
+</head>
+<body>
+<button onclick="addNodes()">Restart Animation</button>
 <svg width="960" height="960" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
-<script src="jquery.min.js"></script>
+
+<title>Animating Changes in Force Diagram</title>
 
 
 
@@ -39,8 +82,8 @@ api="v1"
 
 //# Test S05
 consumerInstanceName="MyC07"
-topic="gdeltEvent6"
 topic="gdeltsmall01"
+topic="gdeltEvent"
 format="avro"
 api="v1"
 
@@ -216,14 +259,21 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
           for(var i = 0; i < data.length; i++)
           {
               var jsonObject = data[i]["value"]
-
               console.log("doing the JSON.parse for "+JSON.stringify(jsonObject))
-
               if (typeof jsonObject["EventId"] !== 'undefined') {
                 // value is {"string":"760689189"}
                 console.log("the event id is "+   stripString(jsonObject["EventId"])  )
                 console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
                 console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
+                setTimeout(function() {
+                graph.addNode(stripString(jsonObject["Actor1Name"])
+                             ,"#E6E6FA"
+                             ,stripString(jsonObject["Actor2Name"])
+                             );
+                             keepNodesOnTop();
+                             }
+                , nextval());
+
               }
               else {
                 console.log("unable to find the EventID")
@@ -242,8 +292,229 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
 
 
 
-console.log("step 1: create Consumer Instance  "+consumerInstanceName+" format "+format)
-if (api == "v1") {
+
+
+
+//
+// new code
+//
+var graph;
+    function myGraph() {
+
+        // Add and remove elements on the graph object
+        this.addNode = function (id,color,group) {
+            nodes.push({"id": id,"color": color,"group":group});
+            update();
+        };
+
+        this.removeNode = function (id) {
+            var i = 0;
+            var n = findNode(id);
+            while (i < links.length) {
+                if ((links[i]['source'] == n) || (links[i]['target'] == n)) {
+                    links.splice(i, 1);
+                }
+                else i++;
+            }
+            nodes.splice(findNodeIndex(id), 1);
+            update();
+        };
+
+        this.removeLink = function (source, target) {
+            for (var i = 0; i < links.length; i++) {
+                if (links[i].source.id == source && links[i].target.id == target) {
+                    links.splice(i, 1);
+                    break;
+                }
+            }
+            update();
+        };
+
+        this.removeallLinks = function () {
+            links.splice(0, links.length);
+            update();
+        };
+
+        this.removeAllNodes = function () {
+            nodes.splice(0, links.length);
+            update();
+        };
+
+        this.addLink = function (source, target, value) {
+            links.push({"source": findNode(source), "target": findNode(target), "value": value});
+            update();
+        };
+
+        var findNode = function (id) {
+            for (var i in nodes) {
+                if (nodes[i]["id"] === id) return nodes[i];
+            }
+            ;
+        };
+
+        var findNodeIndex = function (id) {
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].id == id) {
+                    return i;
+                }
+            }
+            ;
+        };
+
+        // set up the D3 visualisation in the specified element
+        var w = 960,
+            h = 900;
+        var color = d3.scale.category10();
+        var vis = d3.select("body")
+                .append("svg:svg")
+                .attr("width", w)
+                .attr("height", h)
+                .attr("id", "svg")
+                .attr("pointer-events", "all")
+                .attr("viewBox", "0 0 " + w + " " + h)
+                .attr("perserveAspectRatio", "xMinYMid")
+                .append('svg:g');
+
+        var div = d3.select("body").append("div").attr("class", "toolTip");
+        var force = d3.layout.force();
+
+        var nodes = force.nodes(),
+                links = force.links();
+
+        var update = function () {
+            var link = vis.selectAll("line")
+                    .data(links, function (d) {
+                        return d.source.id + "-" + d.target.id;
+                    });
+
+            link.enter().append("line")
+                    .attr("id", function (d) {
+                        return d.source.id + "-" + d.target.id;
+                    })
+                    .attr("stroke-width", function (d) {
+                        return d.value / 10;
+                    })
+                    .attr("class", "link");
+            link.append("title")
+                    .text(function (d) {
+                        return d.value;
+                    });
+            link.exit().remove();
+
+            var node = vis.selectAll("g.node")
+                    .data(nodes, function (d) {
+                        return d.id;
+                    });
+
+            node.on("mousemove", function(d){
+                div.style("left", d3.event.pageX+10+"px");
+                div.style("top", d3.event.pageY-25+"px");
+                div.style("display", "inline-block");
+                div.html((d.group)+"<br>"+(d.group)+"%");
+            });
+
+            node.on("mouseout", function(d){
+                div.style("display", "none");
+            });
+
+
+//       var label = node.append("text")
+//         .attr("dy", ".35em")
+//         .text(function(d) { return d.group; });
+
+            var nodeEnter = node.enter().append("g")
+                    .attr("class", "node")
+                    .call(force.drag);
+
+            nodeEnter.append("svg:circle")
+                    .attr("r", 12)
+                    .attr("id", function (d) {
+                        return "Node;" + d.id;
+                    })
+                    .attr("class", "nodeStrokeClass")
+//                    .attr("fill", function(d) { return color(d.id); });
+                    .attr("fill", function(d) { return d.color });
+
+            nodeEnter.append("svg:text")
+                    .attr("class", "textClass")
+                    .attr("x", 14)
+                    .attr("y", ".31em")
+                    .text(function (d) {
+                        return d.id;
+                    });
+
+            node.exit().remove();
+
+            force.on("tick", function () {
+                node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+                link.attr("x1", function (d) { return d.source.x; })
+                        .attr("y1", function (d) {
+                            return d.source.y;
+                        })
+                        .attr("x2", function (d) {
+                            return d.target.x;
+                        })
+                        .attr("y2", function (d) {
+                            return d.target.y;
+                        });
+                //label
+                //  .attr("x", function(d) { return d.x + 8; })
+                //  .attr("y", function(d) { return d.y; });
+
+            });
+
+            // Restart the force layout.
+            force
+                    .gravity(.001)
+                    .charge(-80000)
+                    .friction(0.001)
+                    //.linkDistance( function(d) { return d.value * 10 } )
+                    .linkDistance(300)
+                    .size([w, h])
+                    .start();
+        };
+
+
+        // Make it all go
+        update();
+    }
+
+
+
+
+
+
+
+    function drawGraph() {
+        graph = new myGraph("#svgdiv");
+        keepNodesOnTop();
+        // callback for the changes in the network
+        var step = -1;
+        function nextval()
+        {
+            step++;
+            return 2000 + (500*step); // initial time, wait time
+        }
+
+        //setTimeout(function() { graph.addNode('COMPANIES',"#1E90FF","Business"); keepNodesOnTop(); }, nextval());
+        //setTimeout(function() { graph.addNode('KING',"#1E90FF","Government"); keepNodesOnTop(); }, nextval());
+        //setTimeout(function() { graph.addLink('COMPANIES','KING',11); keepNodesOnTop(); }, nextval());
+        //setTimeout(function() { graph.addNode('UNITED STATES',"#1E90FF","Government"); keepNodesOnTop(); }, nextval());
+        //setTimeout(function() { graph.addLink('COMPANIES','UNITED STATES',11); keepNodesOnTop(); }, nextval());
+        //setTimeout(function() { graph.addNode('SCIENTIST',"#E6E6FA","Civilian"); keepNodesOnTop(); }, nextval());
+        //setTimeout(function() { graph.addNode('UNITED STATES',"#E6E6FA","Environment"); keepNodesOnTop(); }, nextval());
+ }
+
+    //
+    // starts here
+    //
+    console.log("running drawGraph")
+    drawGraph();
+    console.log("step 1: create Consumer Instance  "+consumerInstanceName+" format "+format)
+
+    // Confluent rest-api stuff
+    if (api == "v1") {
     AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
     createConsumerInstance(consumerInstanceName,format, api, v1_getTopicRecords)
     }
@@ -251,4 +522,24 @@ if (api == "v1") {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
 
+
+    // because of the way the network is created, nodes are created first, and links second,
+    // so the lines were on top of the nodes, this just reorders the DOM to put the svg:g on top
+    function keepNodesOnTop() {
+        $(".nodeStrokeClass").each(function( index ) {
+            var gnode = this.parentNode;
+            gnode.parentNode.appendChild(gnode);
+        });
+    }
+    function addNodes() {
+        d3.select("svg")
+                .remove();
+         drawGraph();
+    }
+//
+// end of new code
+//
+
 </script>
+</body>
+</html>
