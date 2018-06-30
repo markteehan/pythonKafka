@@ -55,6 +55,7 @@ console.log("base uri is "+base_uri)
 //org.apache.kafka.common.config.ConfigException: Invalid value smallest for configuration auto.offset.reset: String must be one of: latest, earliest, none
 
 fetchOnce=0
+var step = -1;
 AutoOffsetReset="earliest"
 
 //#consumerInstanceName="MyC02"
@@ -82,8 +83,8 @@ api="v1"
 
 //# Test S05
 consumerInstanceName="MyC07"
+topic="gdeltEvent6"
 topic="gdeltsmall01"
-topic="gdeltEvent"
 format="avro"
 api="v1"
 
@@ -265,14 +266,29 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
                 console.log("the event id is "+   stripString(jsonObject["EventId"])  )
                 console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
                 console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
-                setTimeout(function() {
-                graph.addNode(stripString(jsonObject["Actor1Name"])
-                             ,"#E6E6FA"
-                             ,stripString(jsonObject["Actor2Name"])
-                             );
-                             keepNodesOnTop();
-                             }
-                , nextval());
+
+
+              //setTimeout(function() { graph.addNode('UNITED STATES',"#E6E6FA","Environment"); keepNodesOnTop(); }, nextval());
+
+                  if (stripString(jsonObject["Actor1Name"]).length > 0) {
+                  setTimeout(function() {
+                    graph.addNode(stripString(jsonObject["Actor1Name"]),"#E6E6FA","Global News"   );
+                    keepNodesOnTop();
+                                      }
+                                        , nextval());
+                 } else {
+                   console.log("Actor1Name is null - no graph update")
+                }
+
+                  if (stripString(jsonObject["Actor2Name"]).length > 0) {
+                  setTimeout(function() {
+                    graph.addNode(stripString(jsonObject["Actor2Name"]),"#E6E6FA","Global News"   );
+                    keepNodesOnTop();
+                                      }
+                                        , nextval());
+                 } else {
+                   console.log("Actor2Name is null - no graph update")
+                }
 
               }
               else {
@@ -293,16 +309,23 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
 
 
 
-
+function nextval()
+        {
+            step++;
+            return 2000 + (500*step); // initial time, wait time
+        }
 
 //
 // new code
 //
-var graph;
-    function myGraph() {
+    var graph;
+    console.log("graph: initializing");
 
+
+    function myGraph() {
         // Add and remove elements on the graph object
         this.addNode = function (id,color,group) {
+            console.log("addNode: adding "+id);
             nodes.push({"id": id,"color": color,"group":group});
             update();
         };
@@ -379,7 +402,7 @@ var graph;
         var force = d3.layout.force();
 
         var nodes = force.nodes(),
-                links = force.links();
+        links = force.links();
 
         var update = function () {
             var link = vis.selectAll("line")
@@ -482,20 +505,10 @@ var graph;
 
 
 
-
-
-
-
     function drawGraph() {
         graph = new myGraph("#svgdiv");
         keepNodesOnTop();
         // callback for the changes in the network
-        var step = -1;
-        function nextval()
-        {
-            step++;
-            return 2000 + (500*step); // initial time, wait time
-        }
 
         //setTimeout(function() { graph.addNode('COMPANIES',"#1E90FF","Business"); keepNodesOnTop(); }, nextval());
         //setTimeout(function() { graph.addNode('KING',"#1E90FF","Government"); keepNodesOnTop(); }, nextval());
