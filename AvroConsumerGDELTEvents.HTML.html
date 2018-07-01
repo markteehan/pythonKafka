@@ -49,14 +49,11 @@
 
 <script>
 
-base_uri= "http://localhost:8082/consumers/"
-console.log("base uri is "+base_uri)
-//base_uri= "http://10.0.0.4:8082/consumers/"
-//org.apache.kafka.common.config.ConfigException: Invalid value smallest for configuration auto.offset.reset: String must be one of: latest, earliest, none
 
 fetchOnce=0
 var step = -1;
 AutoOffsetReset="earliest"
+ var color = d3.scale.category10();
 
 //#consumerInstanceName="MyC02"
 //#topic="gdeltEvent6"
@@ -79,14 +76,25 @@ api="v1"
 consumerInstanceName="MyC06"
 topic="curlRESTavro"
 format="avro"
+hostname="localhost"
 api="v1"
 
 //# Test S05
-consumerInstanceName="MyC07"
-topic="gdeltEvent6"
+consumerInstanceName="MyC08"
 topic="gdeltsmall01"
+topic="gdeltEvent6"
 format="avro"
+hostname="marks-MacBook.local"
 api="v1"
+
+
+
+
+
+base_uri= "http://"+hostname+":8082/consumers/"
+console.log("base uri is "+base_uri)
+//base_uri= "http://10.0.0.4:8082/consumers/"
+//org.apache.kafka.common.config.ConfigException: Invalid value smallest for configuration auto.offset.reset: String must be one of: latest, earliest, none
 
 
 
@@ -242,7 +250,7 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
       console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
       $.ajax({
                   method: "GET"
-               ,   async:true
+               ,   async:false
                ,crossDomain:true
                ,dataType:'json'
                ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+""
@@ -257,44 +265,46 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
         }
 
         if (data.length != 0) {
+          console.log('(I) iterating over '+data.length+' records')
           for(var i = 0; i < data.length; i++)
           {
               var jsonObject = data[i]["value"]
-              console.log("doing the JSON.parse for "+JSON.stringify(jsonObject))
+              console.log(i+' of'+data.length+": Doing the JSON.parse for "+JSON.stringify(jsonObject).substring(1,50)    )
               if (typeof jsonObject["EventId"] !== 'undefined') {
                 // value is {"string":"760689189"}
                 console.log("the event id is "+   stripString(jsonObject["EventId"])  )
                 console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
                 console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
 
-
-              //setTimeout(function() { graph.addNode('UNITED STATES',"#E6E6FA","Environment"); keepNodesOnTop(); }, nextval());
-
-                  if (stripString(jsonObject["Actor1Name"]).length > 0) {
-                  setTimeout(function() {
-                    graph.addNode(stripString(jsonObject["Actor1Name"]),"#E6E6FA","Global News"   );
-                    keepNodesOnTop();
-                                      }
-                                        , nextval());
+               if (stripString(jsonObject["Actor1Name"]).length > 0) {
+                    console.log("add to graph: "+stripString(jsonObject["Actor1Name"]));
+                    //graph.addNode(stripString(jsonObject["Actor1Name"]),"#E6E6FA","Global News"   );
+                    graph.addNode(stripString(jsonObject["Actor1Name"]),color,"Global News"   );
+                    nextval()
                  } else {
-                   console.log("Actor1Name is null - no graph update")
+                   console.log("Actor1Name is null - no graph update");
                 }
 
-                  if (stripString(jsonObject["Actor2Name"]).length > 0) {
-                  setTimeout(function() {
-                    graph.addNode(stripString(jsonObject["Actor2Name"]),"#E6E6FA","Global News"   );
-                    keepNodesOnTop();
-                                      }
-                                        , nextval());
+               if (stripString(jsonObject["Actor2Name"]).length > 0) {
+                    console.log("add to graph: "+stripString(jsonObject["Actor2Name"]));
+                    //graph.addNode(stripString(jsonObject["Actor2Name"]),"#E6E6FA","Global News"   );
+                    graph.addNode(stripString(jsonObject["Actor2Name"]),color,"Global News"   );
+                    nextval();
                  } else {
-                   console.log("Actor2Name is null - no graph update")
+                   console.log("Actor2Name is null - no graph update");
                 }
 
-              }
+               if (stripString(jsonObject["Actor1Name"]).length > 0 && stripString(jsonObject["Actor2Name"]).length > 0) {
+                   graph.addLink( stripString(jsonObject["Actor1Name"])
+                                 ,stripString(jsonObject["Actor2Name"])
+                                 ,'20');
+                   //graph.keepNodesOnTop();
+                }
               else {
                 console.log("unable to find the EventID")
               }
           }
+        }
         }
       })
       .fail(function(data) {
@@ -387,7 +397,7 @@ function nextval()
         // set up the D3 visualisation in the specified element
         var w = 960,
             h = 900;
-        var color = d3.scale.category10();
+        //var color = d3.scale.category10();
         var vis = d3.select("body")
                 .append("svg:svg")
                 .attr("width", w)
