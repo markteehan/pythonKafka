@@ -54,6 +54,8 @@ fetchOnce=0
 var step = -1;
 AutoOffsetReset="earliest"
  var color = d3.scale.category10();
+var gdeltArray =  new Array();
+var gdeltIndex = 0;
 
 //#consumerInstanceName="MyC02"
 //#topic="gdeltEvent6"
@@ -80,15 +82,14 @@ hostname="localhost"
 api="v1"
 
 //# Test S05
-consumerInstanceName="MyC08"
-topic="gdeltsmall01"
-topic="gdeltEvent6"
+consumerInstanceName="MyC09"
+
+
+topic="gdeltsmall1"
+topic="gdeltEvent7"
 format="avro"
 hostname="marks-MacBook.local"
 api="v1"
-
-
-
 
 
 base_uri= "http://"+hostname+":8082/consumers/"
@@ -236,15 +237,20 @@ function stripString(pString) {
 // there must be a better way of doing this
 // I'm never going to win software developer of the year with this nonsense
  vString=JSON.stringify(pString)
- return vString
-        .replace('{"string":"'  , '')
-        .replace('"}'  , '')
+ if (pString === undefined) {
+    console.log("(I) handling null value")
+    return " "
+ } else {
+   return vString
+          .replace('{"string":"'  , '')
+          .replace('"}'  , '')
+   }
 }
 
 function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfunction) {
   console.log("(I) v1_getTopicRecords: Dequeueing for "+consumerInstance )
   var       vMethod = 'GET'
-
+  var gdeltRecord = {EventId:0, Actor1Name:"",Actor2Name:"",Actor1CountryCode:"",Actor2CountryCode:"",Avgtone:0};
 
   if (fetchOnce==0) {
       console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
@@ -276,33 +282,21 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
                 console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
                 console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
 
-               if (stripString(jsonObject["Actor1Name"]).length > 0) {
-                    console.log("add to graph: "+stripString(jsonObject["Actor1Name"]));
-                    //graph.addNode(stripString(jsonObject["Actor1Name"]),"#E6E6FA","Global News"   );
-                    graph.addNode(stripString(jsonObject["Actor1Name"]),color,"Global News"   );
-                    nextval()
-                 } else {
-                   console.log("Actor1Name is null - no graph update");
-                }
+                var localGdeltArray = {};
+                console.log(localGdeltArray);
 
-               if (stripString(jsonObject["Actor2Name"]).length > 0) {
-                    console.log("add to graph: "+stripString(jsonObject["Actor2Name"]));
-                    //graph.addNode(stripString(jsonObject["Actor2Name"]),"#E6E6FA","Global News"   );
-                    graph.addNode(stripString(jsonObject["Actor2Name"]),color,"Global News"   );
-                    nextval();
-                 } else {
-                   console.log("Actor2Name is null - no graph update");
-                }
+                localGdeltArray.EventId          =stripString(jsonObject["EventId"]);
+                localGdeltArray.Actor1Name       =stripString(jsonObject["Actor1Name"]);
+                localGdeltArray.Actor2Name       =stripString(jsonObject["Actor2Name"]);
+                localGdeltArray.Actor1CountryCode=stripString(jsonObject["Actor1CountryCode"]);
+                localGdeltArray.Actor2CountryCode=stripString(jsonObject["Actor2CountryCode"]);
+                localGdeltArray.Avgtone          =stripString(jsonObject["Avgtone"]);
+                console.log(" the localGdeltArray is "+localGdeltArray);
 
-               if (stripString(jsonObject["Actor1Name"]).length > 0 && stripString(jsonObject["Actor2Name"]).length > 0) {
-                   graph.addLink( stripString(jsonObject["Actor1Name"])
-                                 ,stripString(jsonObject["Actor2Name"])
-                                 ,'20');
-                   //graph.keepNodesOnTop();
-                }
-              else {
-                console.log("unable to find the EventID")
-              }
+                //gdeltArray.push(JSON.stringify(localGdeltArray));
+                gdeltArray.push(localGdeltArray);
+                gdeltIndex+=1;
+
           }
         }
         }
@@ -314,6 +308,36 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
       fetchOnce=1;
     }
 
+    console.log("(I) finished consuming records. Delete the consumer here")
+
+    $.ajax({
+                  method: "DELETE"
+               ,   async:false
+               ,crossDomain:true
+               ,dataType:'json'
+               ,     url: base_uri + groupName + "/instances/"+consumerInstance
+               , headers: {
+                               Accept: "application/vnd.kafka."+pFormat+".v1+json"
+                          }
+         })
+        .done(function(data) {
+          console.log("(I) v1_getTopicRecords: DELETE for consumer /instances/"+consumerInstance);
+        })
+        .fail(function(data) {
+          console.log("(E) v1_getTopicRecords: DELETE FAILED for consumer /instances/"+consumerInstance);
+          console.dir(data)
+       })
+       console.log("(I) this is where we will iterate over the array");
+       gdeltArray.forEach(function (arrayItem) {
+         setTimeout(function() { graph.addNode(arrayItem.Actor1Name,"#1E90FF",arrayItem.Actor1CountryCode); keepNodesOnTop(); }, nextval());
+         console.log("(I) dequeued event "+ arrayItem.EventId
+         +" "+arrayItem.Actor1Name
+         +" "+arrayItem.Actor2Name
+         +" "+arrayItem.Actor1CountryCode
+         +" "+arrayItem.Actor2CountryCode
+         +" "+arrayItem.Avgtone
+         );
+       });
   }
 
 
@@ -520,6 +544,7 @@ function nextval()
         keepNodesOnTop();
         // callback for the changes in the network
 
+
         //setTimeout(function() { graph.addNode('COMPANIES',"#1E90FF","Business"); keepNodesOnTop(); }, nextval());
         //setTimeout(function() { graph.addNode('KING',"#1E90FF","Government"); keepNodesOnTop(); }, nextval());
         //setTimeout(function() { graph.addLink('COMPANIES','KING',11); keepNodesOnTop(); }, nextval());
@@ -538,12 +563,12 @@ function nextval()
 
     // Confluent rest-api stuff
     if (api == "v1") {
-    AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
-    createConsumerInstance(consumerInstanceName,format, api, v1_getTopicRecords)
-    }
-    else {
+      AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
+      createConsumerInstance(consumerInstanceName,format, api, v1_getTopicRecords)
+    } else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
+
 
 
     // because of the way the network is created, nodes are created first, and links second,
