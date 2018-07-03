@@ -40,8 +40,7 @@
     </style>
 </head>
 <body>
-<button onclick="addNodes()">Restart Animation</button>
-<svg width="960" height="960" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
+
 
 <title>Animating Changes in Force Diagram</title>
 
@@ -56,6 +55,7 @@ AutoOffsetReset="earliest"
  var color = d3.scale.category10();
 var gdeltArray =  new Array();
 var gdeltIndex = 0;
+var nodecolor = d3.scale.linear().domain([-20, 0, 20]).range(["red", "white", "green"]);
 
 //#consumerInstanceName="MyC02"
 //#topic="gdeltEvent6"
@@ -275,28 +275,28 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
           for(var i = 0; i < data.length; i++)
           {
               var jsonObject = data[i]["value"]
-              console.log(i+' of'+data.length+": Doing the JSON.parse for "+JSON.stringify(jsonObject).substring(1,50)    )
+              //console.log(i+' of'+data.length+": Doing the JSON.parse for "+JSON.stringify(jsonObject).substring(1,50)    )
               if (typeof jsonObject["EventId"] !== 'undefined') {
                 // value is {"string":"760689189"}
-                console.log("the event id is "+   stripString(jsonObject["EventId"])  )
-                console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
-                console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
+                //console.log("the event id is "+   stripString(jsonObject["EventId"])  )
+                //console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
+                //console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
 
                 var localGdeltArray = {};
-                console.log(localGdeltArray);
+                //console.log(localGdeltArray);
 
                 localGdeltArray.EventId          =stripString(jsonObject["EventId"]);
+                localGdeltArray.Actor1Code       =stripString(jsonObject["Actor1Code"]);
                 localGdeltArray.Actor1Name       =stripString(jsonObject["Actor1Name"]);
                 localGdeltArray.Actor2Name       =stripString(jsonObject["Actor2Name"]);
                 localGdeltArray.Actor1CountryCode=stripString(jsonObject["Actor1CountryCode"]);
                 localGdeltArray.Actor2CountryCode=stripString(jsonObject["Actor2CountryCode"]);
-                localGdeltArray.Avgtone          =stripString(jsonObject["Avgtone"]);
-                console.log(" the localGdeltArray is "+localGdeltArray);
+                localGdeltArray.Avgtone          =stripString(jsonObject["AvgTone"]);
+                //console.log(" the localGdeltArray is "+localGdeltArray);
 
                 //gdeltArray.push(JSON.stringify(localGdeltArray));
                 gdeltArray.push(localGdeltArray);
                 gdeltIndex+=1;
-
           }
         }
         }
@@ -328,15 +328,70 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
           console.dir(data)
        })
        console.log("(I) this is where we will iterate over the array");
+
        gdeltArray.forEach(function (arrayItem) {
-         setTimeout(function() { graph.addNode(arrayItem.Actor1Name,"#1E90FF",arrayItem.Actor1CountryCode); keepNodesOnTop(); }, nextval());
-         console.log("(I) dequeued event "+ arrayItem.EventId
-         +" "+arrayItem.Actor1Name
-         +" "+arrayItem.Actor2Name
-         +" "+arrayItem.Actor1CountryCode
-         +" "+arrayItem.Actor2CountryCode
-         +" "+arrayItem.Avgtone
+         console.log("(I) dequeued event "
+         + arrayItem.EventId
+         +" A1C:"+arrayItem.Actor1Code
+         +" A1N:"+arrayItem.Actor1Name
+         +" A2N:"+arrayItem.Actor2Name
+         +" A1cc:"+arrayItem.Actor1CountryCode
+         +" A2cc:"+arrayItem.Actor2CountryCode
+         +" at:"+arrayItem.Avgtone
          );
+
+         if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor1CountryCode>"") {
+           console.log("(I) AddNode: "
+             + arrayItem.EventId
+             +" A1C:"+arrayItem.Actor1Code
+             +" A1N:"+arrayItem.Actor1Name
+             +" A1cc:"+arrayItem.Actor1CountryCode
+             +" at:"+arrayItem.Avgtone
+           );
+
+           setTimeout(function() { graph.addNode(
+           arrayItem.Actor1Name
+           ,nodecolor(arrayItem.Avgtone)
+           ,arrayItem.Actor1Code
+           ); keepNodesOnTop(); }, nextval());
+
+           setTimeout(function() { graph.addNode(
+           arrayItem.Actor1CountryCode
+           ,"#1E90FF"
+           ,arrayItem.Actor1Code
+           ); keepNodesOnTop(); }, nextval());
+
+           console.log("Doing the Addlink for "+arrayItem.Actor1Name+" and "+arrayItem.Actor1CountryCode);
+
+           setTimeout(function() { graph.addLink(
+            arrayItem.Actor1Name
+           ,arrayItem.Actor1CountryCode
+           ,3); keepNodesOnTop(); }, nextval());
+
+          console.log("Did the Addlink");
+         }
+
+         if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor2Name>"" && arrayItem.Actor1CountryCode>"") {
+           console.log("(I) AddNode: "+ arrayItem.EventId
+           +" A1N:"+arrayItem.Actor1Name
+           +" A2N:"+arrayItem.Actor2Name
+           +" at:"+arrayItem.Avgtone
+           );
+
+           setTimeout(function() { graph.addNode(
+           arrayItem.Actor2Name
+           ,nodecolor(arrayItem.Avgtone)
+           ,arrayItem.Actor1Code
+           ); keepNodesOnTop(); }, nextval());
+
+           setTimeout(function() { graph.addLink(
+            arrayItem.Actor1Name
+           ,arrayItem.Actor2Name
+           ,3); keepNodesOnTop(); }, nextval());
+
+         }
+
+
        });
   }
 
@@ -359,8 +414,15 @@ function nextval()
     function myGraph() {
         // Add and remove elements on the graph object
         this.addNode = function (id,color,group) {
-            console.log("addNode: adding "+id);
-            nodes.push({"id": id,"color": color,"group":group});
+            console.log("addNode: adding "+id+" group:"+group);
+            // MarkTeehan: do a duplicate check here
+            console.log("(I) Duplicate check for "  +id+" is #"+findNodeIndex(id)+"#");
+            if (findNodeIndex(id) === undefined) {
+              nodes.push({"id": id,"color": color,"group":group});
+              console.log("addNode: added "+id+" group:"+group);
+            } else {
+              console.log("addNode: NOT added "+id+": existing node id is "+findNodeIndex(id));
+            }
             update();
         };
 
@@ -420,7 +482,8 @@ function nextval()
 
         // set up the D3 visualisation in the specified element
         var w = 960,
-            h = 900;
+            h = 450;
+
         //var color = d3.scale.category10();
         var vis = d3.select("body")
                 .append("svg:svg")
@@ -523,11 +586,11 @@ function nextval()
 
             // Restart the force layout.
             force
-                    .gravity(.001)
+                    .gravity(.00001)
                     .charge(-80000)
                     .friction(0.001)
                     //.linkDistance( function(d) { return d.value * 10 } )
-                    .linkDistance(300)
+                    .linkDistance(50)
                     .size([w, h])
                     .start();
         };
