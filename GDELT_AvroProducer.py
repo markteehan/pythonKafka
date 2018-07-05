@@ -18,7 +18,7 @@ sys.setdefaultencoding('utf8')
 # 23-jun-2018 MT add GDELT
 countProduced=0
 schema_registry_url = 'http://'+hostname+':8081'
-regexp_gdeltEvent = re.compile(e"(?P<EventId>.*?)\t(?P<eDaey>.*?)\t(?P<MonthYear>.*?)\t(?P<Year>.*?)\t(?P<FractionDate>.*?)\t(?P<Actor1Code>.*?)\t(?P<Actor1Name>.*?)\t(?P<Actor1CountryCode>.*?)\t(?P<Actor1KnownGroupCode>.*?)\t(?P<Actor1EthnicCode>.*?)\t(?P<Actor1Religion1Code>.*?)\t(?P<Actor1Religion2Code>.*?)\t(?P<Actor1Type1Code>.*?)\t(?P<Actor1Type2Code>.*?)\t(?P<Actor1Type3Code>.*?)\t(?P<Actor2Code>.*?)\t(?P<Actor2Name>.*?)\t(?P<Actor2CountryCode>.*?)\t(?P<Actor2KnownGroupCode>.*?)\t(?P<Actor2EthnicCode>.*?)\t(?P<Actor2Religion1Code>.*?)\t(?P<Actor2Religion2Code>.*?)\t(?P<Actor2Type1Code>.*?)\t(?P<Actor2Type2Code>.*?)\t(?P<Actor2Type3Code>.*?)\t(?P<IsRootEvent>.*?)\t(?P<EventCode>.*?)\t(?P<EventBaseCode>.*?)\t(?P<EventRootCode>.*?)\t(?P<QuadClass>.*?)\t(?P<GoldsteinScale>.*?)\t(?P<NumMentions>.*?)\t(?P<NumSources>.*?)\t(?P<NumArticles>.*?)\t(?P<AvgTone>.*?)\t(?P<Actor1Geo_Type>.*?)\t(?P<Actor1Geo_FullName>.*?)\t(?P<Actor1Geo_CountryCode>.*?)\t(?P<Actor1Geo_ADM1Code>.*?)\t(?P<Actor1Geo_ADM2Code>.*?)\t(?P<Actor1Geo_Lat>.*?)\t(?P<Actor1Geo_Long>.*?)\t(?P<Actor1Geo_FeatureID>.*?)\t(?P<Actor2Geo_Type>.*?)\t(?P<Actor2Geo_FullName>.*?)\t(?P<Actor2Geo_CountryCode>.*?)\t(?P<Actor2Geo_ADM1Code>.*?)\t(?P<Actor2Geo_ADM2Code>.*?)\t(?P<Actor2Geo_Lat>.*?)\t(?P<Actor2Geo_Long>.*?)\t(?P<Actor2Geo_FeatureID>.*?)\t(?P<ActionGeo_Type>.*?)\t(?P<ActionGeo_FullName>.*?)\t(?P<ActionGeo_CountryCode>.*?)\t(?P<ActionGeo_ADM1Code>.*?)\t(?P<ActionGeo_ADM2Code>.*?)\t(?P<ActionGeo_Lat>.*?)\t(?P<ActionGeo_Long>.*?)\t(?P<ActionGeo_FeatureID>.*?)\t(?P<DateAdded>.*?)\t(?P<SourceUrl>.*)");e
+regexp_gdeltEvent = re.compile("(?P<EventId>.*?)\t(?P<Day>.*?)\t(?P<MonthYear>.*?)\t(?P<Year>.*?)\t(?P<FractionDate>.*?)\t(?P<Actor1Code>.*?)\t(?P<Actor1Name>.*?)\t(?P<Actor1CountryCode>.*?)\t(?P<Actor1KnownGroupCode>.*?)\t(?P<Actor1EthnicCode>.*?)\t(?P<Actor1Religion1Code>.*?)\t(?P<Actor1Religion2Code>.*?)\t(?P<Actor1Type1Code>.*?)\t(?P<Actor1Type2Code>.*?)\t(?P<Actor1Type3Code>.*?)\t(?P<Actor2Code>.*?)\t(?P<Actor2Name>.*?)\t(?P<Actor2CountryCode>.*?)\t(?P<Actor2KnownGroupCode>.*?)\t(?P<Actor2EthnicCode>.*?)\t(?P<Actor2Religion1Code>.*?)\t(?P<Actor2Religion2Code>.*?)\t(?P<Actor2Type1Code>.*?)\t(?P<Actor2Type2Code>.*?)\t(?P<Actor2Type3Code>.*?)\t(?P<IsRootEvent>.*?)\t(?P<EventCode>.*?)\t(?P<EventBaseCode>.*?)\t(?P<EventRootCode>.*?)\t(?P<QuadClass>.*?)\t(?P<GoldsteinScale>.*?)\t(?P<NumMentions>.*?)\t(?P<NumSources>.*?)\t(?P<NumArticles>.*?)\t(?P<AvgTone>.*?)\t(?P<Actor1Geo_Type>.*?)\t(?P<Actor1Geo_FullName>.*?)\t(?P<Actor1Geo_CountryCode>.*?)\t(?P<Actor1Geo_ADM1Code>.*?)\t(?P<Actor1Geo_ADM2Code>.*?)\t(?P<Actor1Geo_Lat>.*?)\t(?P<Actor1Geo_Long>.*?)\t(?P<Actor1Geo_FeatureID>.*?)\t(?P<Actor2Geo_Type>.*?)\t(?P<Actor2Geo_FullName>.*?)\t(?P<Actor2Geo_CountryCode>.*?)\t(?P<Actor2Geo_ADM1Code>.*?)\t(?P<Actor2Geo_ADM2Code>.*?)\t(?P<Actor2Geo_Lat>.*?)\t(?P<Actor2Geo_Long>.*?)\t(?P<Actor2Geo_FeatureID>.*?)\t(?P<ActionGeo_Type>.*?)\t(?P<ActionGeo_FullName>.*?)\t(?P<ActionGeo_CountryCode>.*?)\t(?P<ActionGeo_ADM1Code>.*?)\t(?P<ActionGeo_ADM2Code>.*?)\t(?P<ActionGeo_Lat>.*?)\t(?P<ActionGeo_Long>.*?)\t(?P<ActionGeo_FeatureID>.*?)\t(?P<DateAdded>.*?)\t(?P<SourceUrl>.*)")
 # Match any character until space [^\s]+
 
 
@@ -29,17 +29,11 @@ def Produce_gdeltEvent(topic,data,key):
 def load(datafile, topic, server):
     global count_gdeltEvent
     global avroProducer_gdeltEvent
-    print("here3")
     with open(datafile) as f:
-      print("here3.1")
       for row in f.readlines():
-          #print("here3.2 "+str(row) )
-          #print("match is "+re.match(regexp_gdeltEvent, str(row)))
-          print("here 3.3")
           if not re.match(regexp_gdeltEvent, str(row)):
-            print("here4")
+              print("(E) No Match for regexp_gdeltEvent!")
           if     re.match(regexp_gdeltEvent, str(row)):
-              print("here5 - match")
               match=re.match(regexp_gdeltEvent,row)
               count_gdeltEvent+=1
               data = {
@@ -103,10 +97,8 @@ def load(datafile, topic, server):
               , 'DateAdded':match.group('DateAdded')
               , 'SourceUrl':match.group('SourceUrl')
               , 'Site': match.group('SourceUrl').split("/")[2]
-
               }
               vStrTopic='{"'+topic+'":"'+str(match.group('EventId'))+'"}'
-              print(data)
               print(" producing topic for"+vStrTopic)
               avroProducer_gdeltEvent.produce(topic=topic, value=data)
     avroProducer_gdeltEvent.flush()
@@ -196,6 +188,7 @@ schema_values_str = """
 ,{"name": "ActionGeo_FeatureID" ,"type": ["null","string"],"default":null}
 ,{"name": "DateAdded" ,"type": ["null","string"],"default":null}
 ,{"name": "SourceUrl" ,"type": ["null","string"],"default":null}
+,{"name": "Site" ,"type": ["null","string"],"default":null}
 ]
 }""".replace("REPLACEME_TOPIC", topic)
 
@@ -203,14 +196,11 @@ value_schema = avro.loads(schema_values_str)
 
 
 avroProducer_gdeltEvent = AvroProducer({'bootstrap.servers': server
-                                   , 'schema.registry.url': schema_registry_url}e
-                                    , default_value_schema=value_schema
+                                      , 'schema.registry.url': schema_registry_url}
+                                      , default_value_schema=value_schema
                                     )
-print("here1")
 load(datafile, topic, server)
-print("here2")
-avroProducer_gdeltEvent.flush()e
+avroProducer_gdeltEvent.flush()
 
 #if __name__ == "__main__":
 #    main()
-eee
