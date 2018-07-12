@@ -6,6 +6,7 @@ import re
 from confluent_kafka import avro
 from confluent_kafka.avro import AvroProducer
 
+hostname='marks-MacBook.local'
 
 #
 # The next two lines prevent erros from unicode characters:
@@ -15,7 +16,7 @@ sys.setdefaultencoding('utf8')
 
 # 23-jun-2018 MT add GDELT
 countProduced=0
-schema_registry_url = 'http://localhost:8081'
+schema_registry_url = 'http://'+hostname+':8081'
 
 # Match any character until space [^\s]+
 
@@ -46,9 +47,9 @@ def setupTopic_gdeltEvent(server,schema_registry_url):
   schema_key_str = """
     {"namespace": "gdelt.event.avro",
     "type": "record",
-    "name": "gdeltEvent4_key",
+    "name": "gdeltEvent7_key",
     "fields": [
-       {"name": "gdeltEvent4_key" ,"type":"string"}
+       {"name": "gdeltEvent7_key" ,"type":"string"}
        ]
     }
   """
@@ -56,7 +57,7 @@ def setupTopic_gdeltEvent(server,schema_registry_url):
   schema_values_str="""
   {"namespace": "gdelt.event.avro",
   "type": "record",
-  "name": "gdeltEvent6",
+  "name": "gdeltEvent7",
   "fields": [
      {"name": "EventId" ,"type": ["null","string"],"default":null}
     ,{"name": "Day" ,"type": ["null","string"],"default":null}
@@ -482,7 +483,7 @@ def load(datafile, schema, server):
           , 'DateAdded':match.group('DateAdded')
           , 'SourceUrl':match.group('SourceUrl')
         }
-             Produce_gdeltEvent("gdeltEvent6",data,'{"gdeltEvent6_key":"'+str(match.group('EventId')+'"}'))
+             Produce_gdeltEvent("gdeltEvent7",data,'{"gdeltEvent7_key":"'+str(match.group('EventId')+'"}'))
              avroProducer_gdeltEvent.flush()
           else:
            print("NotMatch : ",row)
@@ -492,7 +493,7 @@ def load(datafile, schema, server):
 def main():
     datafile = ''
     schema = ''
-    server = 'localhost:9092'
+    server = hostname+':9092'
 
     if len(sys.argv) == 1:
         print("Usage: \n")
@@ -515,7 +516,7 @@ def main():
 
 
 if __name__ == '__main__':
-    server = 'localhost:9092'
+    server = hostname+':9092'
     setupTopic_routerMessage(server,schema_registry_url)
     setupTopic_routerHttp(server,schema_registry_url)
     setupTopic_routerHsBridge(server,schema_registry_url)

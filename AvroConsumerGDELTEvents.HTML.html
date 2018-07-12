@@ -2,8 +2,15 @@
 <html>
 <head>
     <title>Animated Force Chart</title>
-    <script src="d3.min.js"></script>
+	<link href="jquery-ui-1.12.1.custom/jquery-ui.css" rel="stylesheet">
+	<script src="d3.min.js"></script>
     <script src="jquery.min.js"></script>
+	<script src="jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+
+
+    <input name="startButton" type="button" value="Start" onclick="startHere()"/>
+
+
     <style>
         .link {
             stroke: #2E2E2E;
@@ -21,38 +28,182 @@
             stroke-width: .5;
             font-size: 10px;
         }
-.toolTip {
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        position: absolute;
-        display: none;
-        width: auto;
-        height: auto;
-        background: none repeat scroll 0 0 white;
-        border: 0 none;
-        border-radius: 8px 8px 8px 8px;
-        box-shadow: -3px 3px 15px #888888;
-        color: black;
-        font: 12px sans-serif;
-        padding: 5px;
-        text-align: center;
-    }
 
+
+    //jquery UI
+    	body{
+		font-family: "Trebuchet MS", sans-serif;
+		margin: 50px;
+	}
+	.demoHeaders {
+		margin-top: 2em;
+	}
+	#dialog-link {
+		padding: .4em 1em .4em 20px;
+		text-decoration: none;
+		position: relative;
+	}
+	#dialog-link span.ui-icon {
+		margin: 0 5px 0 0;
+		position: absolute;
+		left: .2em;
+		top: 50%;
+		margin-top: -8px;
+	}
+	#icons {
+		margin: 0;
+		padding: 0;
+	}
+	#icons li {
+		margin: 2px;
+		position: relative;
+		padding: 4px 0;
+		cursor: pointer;
+		float: left;
+		list-style: none;
+	}
+	#icons span.ui-icon {
+		float: left;
+		margin: 0 4px;
+	}
+	.fakewindowcontain .ui-widget-overlay {
+		position: absolute;
+	}
+	select {
+		width: 200px;
+	}
     </style>
 </head>
 <body>
 
 
 <title>Animating Changes in Force Diagram</title>
+<div class="ui-widget">
+	<div id="restBox" name="restBox"  class="ui-state-highlight ui-corner-all" style="margin-top: 2px; padding: 0 .7em;">
+		<p><span  style="float: left; margin-right: .3em;"></span></p>
+	</div>
+</div>
+
+<div class="ui-widget">
+	<div id="resultBox" name="resultBox"  class="ui-state-highlight ui-corner-all" style="margin-top: 2px; padding: 0 .7em;">
+		<p><span   style="margin-left: .3em;float: left; margin-right: .3em;"></span></p>
+	</div>
+</div>
+<div class="ui-widget">
+      <div id="cmdBox" name="cmdBox" class="ui-state-highlight ui-corner-all" style="margin-top: 2px; padding: 0 .7em;">
+		<p><span  style="float: left; margin-right: .3em;"></span></p>
+  	  </div>
+</div>
 
 
+
+<!-- Checkboxradio https://www.gdeltproject.org/data/documentation/CAMEO.Manual.1.1b3.pdf -->
+<!--
+<h2 class="demoHeaders">Checkboxradio</h2>
+<form>
+	<div id="radioset">
+        <input type="radio"  value="ALL" name="selectCategory">                  <label for="radio1">All</label>
+		<input type="radio"  value="MNC" name="selectCategory">                  <label for="radio1">Multinationals</label>
+		<input type="radio"  value="MIL" name="selectCategory" checked="checked"><label for="radio2">Military</label>
+		<input type="radio"  value="AGR" name="selectCategory">                  <label for="radio3">Agriculture</label>
+        <input type="radio"  value="ENV" name="selectCategory">                  <label for="radio3">Environment</label>
+        <input type="radio"  value="MED" name="selectCategory">                  <label for="radio3">Media</label>
+	</div>
+</form>
+-->
 
 <script>
+
+var selectedCategory="ALL"
+var consumedMessages=0;
+
+$(document).ready(function() {
+    $('input:radio[name=selectCategory]').change(function() {
+        if (this.value == 'ALL') {
+            alert("Selecting all categories");
+        }
+        else if (this.value != 'ALL') {
+            alert("Filtering to "+this.value+" category");
+            selectedCategory=this.value;
+        }
+    });
+});
+
+
+function setCmdBox(newText) {
+  vFont="14px"
+  vText=""
+  vText=newText.toString().substring(1,100)
+  if (newText.length>100) {
+    vText=newText.toString().substring(0,100)+"..."
+  }
+  else {
+    vText= newText.toString()
+  }
+
+  $('#cmdBox').text(vText);
+  $( "#cmdBox" ).css({
+    fontSize: vFont,
+    color: "black",
+    "font-family":"monospace",
+    "height":"25px"
+});
+}
+
+function setRestBox(newText) {
+  vFont="12px"
+  vText=newText;
+
+  console.log("Setting restBox to "+newText);
+
+  if (newText==='undefined') {
+    vText="HTTP: no result"
+  }
+
+  if (vText.length>165) {
+    vText=newText.toString().substring(0,165)+"..."
+  }
+  else {
+    vText=newText.toString()
+  }
+
+  $('#restBox').text(vText);
+  $( "#restBox" ).css({
+    fontSize: vFont,
+    color: "black",
+    "font-family":"monospace",
+    "height":"25px"
+});
+}
+
+
+function setResultBox(newText,pColor) {
+  vFont="14px"
+  vText=""
+  vText=newText;
+  if (vText.length>85) {
+    vText="[Returned]:  " + vText.toString().substring(0,85)+"..."
+  }
+  else {
+    vText="[Returned]:  " + vText.toString().substring(0,85)
+  }
+
+  $('#resultBox').text(vText);
+
+  $( "#resultBox" ).css({
+    fontSize: vFont,
+    color: pColor,
+    "font-family":"monospace",
+    "height":"25px"
+});
+}
 
 
 fetchOnce=0
 var step = -1;
+var topic="";
 AutoOffsetReset="earliest"
- var color = d3.scale.category10();
+var color = d3.scale.category10();
 var gdeltArray =  new Array();
 var gdeltIndex = 0;
 var nodecolor = d3.scale.linear().domain([-20, 0, 20]).range(["red", "white", "green"]);
@@ -63,20 +214,20 @@ var nodecolor = d3.scale.linear().domain([-20, 0, 20]).range(["red", "white", "g
 
 //# Test S03
 consumerInstanceName="MyC04"
-topic="curlRESTjson"
+//topic="curlRESTjson"
 format="json"
 api="v1"
 
 
 //# Test S04
 consumerInstanceName="MyC05"
-topic="curlRESTbinary"
+//topic="curlRESTbinary"
 format="binary"
 api="v1"
 
 //# Test S05
 consumerInstanceName="MyC06"
-topic="curlRESTavro"
+//topic="curlRESTavro"
 format="avro"
 hostname="localhost"
 api="v1"
@@ -85,33 +236,96 @@ api="v1"
 consumerInstanceName="MyC09"
 
 
-topic="gdeltsmall1"
-topic="gdeltEvent7"
+//topic="gdeltsmall1"
+//topic="GDELT_EVENT_20180703101500"
 format="avro"
 hostname="marks-MacBook.local"
 api="v1"
 
 
-base_uri= "http://"+hostname+":8082/consumers/"
+base_uri= "http://"+hostname+":8082/"
+consumer_base_uri= base_uri + "consumers/"
+
+
 console.log("base uri is "+base_uri)
+
 //base_uri= "http://10.0.0.4:8082/consumers/"
 //org.apache.kafka.common.config.ConfigException: Invalid value smallest for configuration auto.offset.reset: String must be one of: latest, earliest, none
 
 
+// jQuery UI stuff
+//$( "#radio1" ).buttonset();
+// end of jQuery UI stuff
 
 
-function createConsumerInstance(groupname, pFormat, pApi, callbackfunction) {
+
+
+function findLatestTopic(groupname, pFormat, pApi, callbackfunction) {
+  // retrieve topic names
+  var LatestGdeltSnapshot=""
+  var       vMethod = 'GET'
+  var jsonObject;
+  var vContent_Type = ""
+        var vAccept = ""
+         var vAsync = "false"    // mandatory: process topics before creating the consumer instance
+           var vUri = base_uri + "topics"
+          var vData = ''
+        var vHeaders='{Accept: "application/vnd.kafka.'+pApi+'+json"}'
+
+  setCmdBox("(I) findLatestTopic: Querying topic names from "+base_uri+"topics")
+  setRestBox(vMethod+" "+vUri+" "+vHeaders)
+  var jqxhr = $.ajax({
+           method: vMethod
+    ,       async: vAsync
+    ,    dataType: "json"
+    ,         url: vUri
+    ,     headers: vHeaders
+  })
+  .done(function(data) {
+    setResultBox(data,"green")
+    console.log("(I) findLatestTopic: topics retrieved. Sorting, finding latest")
+    if (data.length == 0) {
+      console.log("(I) findLatestTopic: NO topics returned!")
+    }
+    if (data.length != 0) {
+      for(var i = 0; i < data.length; i++)
+      {
+          jsonObject = data[i]
+          if (typeof jsonObject !== 'undefined') {
+            if (jsonObject.search("GDELT_EVENT_20180707121500") > -1 && jsonObject > LatestGdeltSnapshot) {
+              console.log("(I) findLatestTopic: processing topic "+jsonObject+" (relevant="+jsonObject.search("GDELT")+")");
+              LatestGdeltSnapshot = jsonObject;
+            }
+           }
+      }   //end of for loop
+      console.log("Finished iterating over topics")
+      topic = LatestGdeltSnapshot;
+      setCmdBox("findLatestTopic: subscribing to topic "+jsonObject);
+      console.log("(I) findLatestTopic: subscribing to topic "+jsonObject);
+    }
+  })
+  .fail(function(data) {
+    console.log("(E) findLatestTopic: Error retrieving list of topics:\n")
+    setResultBox(JSON.stringify(data),"red")
+    console.log(JSON.stringify(data))
+  });
+
+
+
+}
+
+
+function createConsumerInstance(groupname, pFormat, pApi, chartType, callbackfunction) {
   // Consumer Instance not created, create one
-
-
   var       vMethod = 'POST'
   var vContent_Type = "application/vnd.kafka."+pApi+"+json"
         var vAccept = ""
-           var vUri = base_uri + groupname
+           var vUri = consumer_base_uri + groupname
           var vData = '{     "format": "'+pFormat+'", "auto.offset.reset": "'+AutoOffsetReset+'","auto.commit.enable":"false"  }'
 
 
   console.log("(I) createConsumerInstance: Creating new "+pFormat+" Consumer Instance for "+groupname+" using "+vContent_Type+' and '+vUri+" and " + vData)
+  setCmdBox("Creating new "+pFormat+" Consumer Instance for "+groupname+" using "+vContent_Type+' and '+vUri+" and " + vData)
 
   var jqxhr = $.ajax({
            method: vMethod
@@ -126,7 +340,7 @@ function createConsumerInstance(groupname, pFormat, pApi, callbackfunction) {
     consumerinstancesArray = consumerinstance.split("/")
     consumerinstance = consumerinstancesArray[consumerinstancesArray.length - 1]
     console.log("(I) createConsumerInstance: New consumer parsed " + consumerinstance)
-    callbackfunction(consumerinstance, groupname, pFormat, v2_createConsumerSubscription)
+    callbackfunction(consumerinstance, groupname, pFormat, chartType, v2_createConsumerSubscription)
   })
   .fail(function(data) {
     console.log("(E) createConsumerInstance: Error creating Consumer Instance:\n")
@@ -146,10 +360,11 @@ function v2_createConsumerSubscription(consumerInstance, groupName, pFormat, cal
 
   var       vMethod = 'POST'
   var vContent_Type = "application/vnd.kafka.v1+json"
-           var vUrl = base_uri + groupName + "/instances/"+consumerInstance+"/subscription/"
+           var vUrl = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/subscription/"
            var vData = '{\"topics\":[\"'+topic+'\"]}'
 
   console.log("(I) createConsumerSubscription: about to call "+vUrl+" for topic "+vData )
+  setCmdBox("Creating consumer subscription")
 
   $.ajax({
            method: vMethod
@@ -159,7 +374,7 @@ function v2_createConsumerSubscription(consumerInstance, groupName, pFormat, cal
     ,contentType: "application/vnd.kafka.v1+json"
   })
   .done(function(data) {
-    console.log("(I) createConsumerSubscription: subscribed consumer subscription using "+base_uri + groupName + "/instances/"+consumerInstance+"/subscription" )
+    console.log("(I) createConsumerSubscription: subscribed consumer subscription using "+consumer_base_uri + groupName + "/instances/"+consumerInstance+"/subscription" )
     callbackfunction(consumerInstance, groupName,pFormat,  v2_startConsuming)
   })
   .fail(function(data) {
@@ -192,6 +407,7 @@ function v2_startConsuming(consumerInstance, groupName, pFormat, callbackfunctio
 
 function v2_runConsume(consumerInstance, groupName,pFormat) {
      var       vMethod = 'GET'
+     var executions=1
         //beforeSend: function (xhr){
         //              xhr.setRequestHeader("Content-Type","application/vnd.kafka.avro.v2+json");
         // xhr.setRequestHeader("Accept","application/vnd.kafka.avro.v2+json");
@@ -202,13 +418,15 @@ function v2_runConsume(consumerInstance, groupName,pFormat) {
                   method: "GET"
                ,dataType:"json"
                ,   async:"false"
-               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/records"
+               ,     url: consumer_base_uri + groupName + "/instances/"+consumerInstance+"/records"
                , headers: {
                                Accept: "application/vnd.kafka."+pFormat+".v2+json"
                           }
       })
       .done(function(data) {
         console.log("(I) runConsume: Consumed some "+pFormat+" data of some size ")
+        executions=executions+1;
+
         if (data.length == 0) {
           console.log("NO data returned!")
         }
@@ -247,51 +465,67 @@ function stripString(pString) {
    }
 }
 
-function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfunction) {
+function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, callbackfunction) {
   console.log("(I) v1_getTopicRecords: Dequeueing for "+consumerInstance )
+  var execution=0;
+  var selectedVal = "";
+  var selected = $("input[type='radio'][name='radio']:checked");
+  if (selected.length > 0) {
+      selectedVal = selected.val();
+  }
+
+
+  var selected = $("#radioset input[type='radio']:checked");
+  if (selected.length > 0) {
+    selectedVal = selected.val();
+  }
+  console.log("(D) Radioset setting is "+selectedVal)
+
   var       vMethod = 'GET'
-  var gdeltRecord = {EventId:0, Actor1Name:"",Actor2Name:"",Actor1CountryCode:"",Actor2CountryCode:"",Avgtone:0};
+  var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"";
+  var nowProcessing=0
+  var vHeaders="{Accept: 'application/vnd.kafka."   +pFormat   +".v1+json' }"  // hardcoded below - check why
 
   if (fetchOnce==0) {
-      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
+      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
+      setRestBox(vMethod+" "+vUri+" "+vHeaders)
       $.ajax({
-                  method: "GET"
+                  method: vMethod
                ,   async:false
                ,crossDomain:true
                ,dataType:'json'
-               ,     url: base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+""
-               , headers: {
-                               Accept: "application/vnd.kafka."+pFormat+".v1+json"
-                          }
+               ,     url: vUri
+               , headers: {Accept: "application/vnd.kafka.avro.v1+json" }
       })
       .done(function(data) {
+        setResultBox(data,"green")
         console.log("(I) v1_getTopicRecords: Consumed some "+pFormat+" data of some size ")
         if (data.length == 0) {
           console.log("(I) v1_getTopicRecords: NO data returned!")
         }
 
         if (data.length != 0) {
+          consumedMessages+=data.length;
+          //setCmdBox("Consuming messages ("+data.length+" messages consumed)")
           console.log('(I) iterating over '+data.length+' records')
           for(var i = 0; i < data.length; i++)
           {
               var jsonObject = data[i]["value"]
               //console.log(i+' of'+data.length+": Doing the JSON.parse for "+JSON.stringify(jsonObject).substring(1,50)    )
               if (typeof jsonObject["EventId"] !== 'undefined') {
-                // value is {"string":"760689189"}
-                //console.log("the event id is "+   stripString(jsonObject["EventId"])  )
-                //console.log("Actor1Name "+   stripString(jsonObject["Actor1Name"])  )
-                //console.log("Actor2Name "+   stripString(jsonObject["Actor2Name"])  )
 
                 var localGdeltArray = {};
                 //console.log(localGdeltArray);
 
                 localGdeltArray.EventId          =stripString(jsonObject["EventId"]);
                 localGdeltArray.Actor1Code       =stripString(jsonObject["Actor1Code"]);
+                localGdeltArray.Actor1Type1Code  =stripString(jsonObject["Actor1Type1Code"]);
                 localGdeltArray.Actor1Name       =stripString(jsonObject["Actor1Name"]);
                 localGdeltArray.Actor2Name       =stripString(jsonObject["Actor2Name"]);
                 localGdeltArray.Actor1CountryCode=stripString(jsonObject["Actor1CountryCode"]);
                 localGdeltArray.Actor2CountryCode=stripString(jsonObject["Actor2CountryCode"]);
                 localGdeltArray.Avgtone          =stripString(jsonObject["AvgTone"]);
+                localGdeltArray.Site             =stripString(jsonObject["Site"]);
                 //console.log(" the localGdeltArray is "+localGdeltArray);
 
                 //gdeltArray.push(JSON.stringify(localGdeltArray));
@@ -309,89 +543,89 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat, callbackfuncti
     }
 
     console.log("(I) finished consuming records. Delete the consumer here")
+    vMethod = 'DELETE'
+    vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance
+    var vHeaders='{ Accept: "application/vnd.kafka.'+pFormat+'.v1+json" }'
 
+    //setRestBox(vMethod+" "+vUri+" "+vHeaders)
     $.ajax({
-                  method: "DELETE"
+                  method:vMethod
                ,   async:false
                ,crossDomain:true
                ,dataType:'json'
-               ,     url: base_uri + groupName + "/instances/"+consumerInstance
-               , headers: {
-                               Accept: "application/vnd.kafka."+pFormat+".v1+json"
-                          }
+               ,     url: vUri
+               , headers:vHeaders
          })
         .done(function(data) {
+          //setResultBox(data,"green")
           console.log("(I) v1_getTopicRecords: DELETE for consumer /instances/"+consumerInstance);
         })
         .fail(function(data) {
+          setResultBox(data,"red")
           console.log("(E) v1_getTopicRecords: DELETE FAILED for consumer /instances/"+consumerInstance);
           console.dir(data)
        })
-       console.log("(I) this is where we will iterate over the array");
+       console.log("(I) this is where we will iterate over "+gdeltArray.length+" records");
 
        gdeltArray.forEach(function (arrayItem) {
-         console.log("(I) dequeued event "
-         + arrayItem.EventId
-         +" A1C:"+arrayItem.Actor1Code
-         +" A1N:"+arrayItem.Actor1Name
-         +" A2N:"+arrayItem.Actor2Name
-         +" A1cc:"+arrayItem.Actor1CountryCode
-         +" A2cc:"+arrayItem.Actor2CountryCode
-         +" at:"+arrayItem.Avgtone
-         );
+       //if (arrayItem.Actor1Code == selectedCategory || selectedCategory == 'ALL') {
+       if (2==2) {
+             nowProcessing=nowProcessing+1;
+             if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor1CountryCode>"") {
 
-         if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor1CountryCode>"") {
-           console.log("(I) AddNode: "
-             + arrayItem.EventId
-             +" A1C:"+arrayItem.Actor1Code
-             +" A1N:"+arrayItem.Actor1Name
-             +" A1cc:"+arrayItem.Actor1CountryCode
-             +" at:"+arrayItem.Avgtone
-           );
+               setTimeout(function() { graph.addNode(
+               arrayItem.Actor1Name
+               ,nodecolor(arrayItem.Avgtone)
+               ,arrayItem.Actor1Code
+               ,nowProcessing
+               ); keepNodesOnTop(); }, nextval());
 
-           setTimeout(function() { graph.addNode(
-           arrayItem.Actor1Name
-           ,nodecolor(arrayItem.Avgtone)
-           ,arrayItem.Actor1Code
-           ); keepNodesOnTop(); }, nextval());
+               if (chartType="country") {
+                 setTimeout(function() { graph.addNode(
+                 arrayItem.Actor1CountryCode
+                 ,"#1E90FF"
+                 ,arrayItem.Actor1Code
+                 ,nowProcessing
+                 ); keepNodesOnTop(); }, nextval());
 
-           setTimeout(function() { graph.addNode(
-           arrayItem.Actor1CountryCode
-           ,"#1E90FF"
-           ,arrayItem.Actor1Code
-           ); keepNodesOnTop(); }, nextval());
+                 setTimeout(function() { graph.addLink(
+                  arrayItem.Actor1Name
+                 ,arrayItem.Actor1CountryCode
+                 ,3); keepNodesOnTop(); }, nextval());
+               }
 
-           console.log("Doing the Addlink for "+arrayItem.Actor1Name+" and "+arrayItem.Actor1CountryCode);
+               if (chartType="publisher") {
+                 setTimeout(function() { graph.addNode(
+                 arrayItem.Site
+                 ,"purple"
+                 ,arrayItem.Actor1Code
+                 ,nowProcessing
+                 ); keepNodesOnTop(); }, nextval());
 
-           setTimeout(function() { graph.addLink(
-            arrayItem.Actor1Name
-           ,arrayItem.Actor1CountryCode
-           ,3); keepNodesOnTop(); }, nextval());
+                 setTimeout(function() { graph.addLink(
+                  arrayItem.Actor1Name
+                 ,arrayItem.Site
+                 ,3); keepNodesOnTop(); }, nextval());
+               }
+             }
 
-          console.log("Did the Addlink");
-         }
+             if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor2Name>"" && arrayItem.Actor1CountryCode>"") {
 
-         if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor2Name>"" && arrayItem.Actor1CountryCode>"") {
-           console.log("(I) AddNode: "+ arrayItem.EventId
-           +" A1N:"+arrayItem.Actor1Name
-           +" A2N:"+arrayItem.Actor2Name
-           +" at:"+arrayItem.Avgtone
-           );
+               setTimeout(function() { graph.addNode(
+               arrayItem.Actor2Name
+               ,nodecolor(arrayItem.Avgtone)
+               ,arrayItem.Actor1Code
+               ,nowProcessing
+               ); keepNodesOnTop(); }, nextval());
 
-           setTimeout(function() { graph.addNode(
-           arrayItem.Actor2Name
-           ,nodecolor(arrayItem.Avgtone)
-           ,arrayItem.Actor1Code
-           ); keepNodesOnTop(); }, nextval());
-
-           setTimeout(function() { graph.addLink(
-            arrayItem.Actor1Name
-           ,arrayItem.Actor2Name
-           ,3); keepNodesOnTop(); }, nextval());
-
-         }
+               setTimeout(function() { graph.addLink(
+                arrayItem.Actor1Name
+               ,arrayItem.Actor2Name
+               ,3); keepNodesOnTop(); }, nextval());
 
 
+             }
+           }
        });
   }
 
@@ -413,15 +647,16 @@ function nextval()
 
     function myGraph() {
         // Add and remove elements on the graph object
-        this.addNode = function (id,color,group) {
-            console.log("addNode: adding "+id+" group:"+group);
+        this.addNode = function (id,color,group,messageNumber) {
+            setCmdBox("Consumed message "+messageNumber+ "(of "+consumedMessages+" messages)")
+            //console.log("addNode: adding "+id+" group:"+group);
             // MarkTeehan: do a duplicate check here
-            console.log("(I) Duplicate check for "  +id+" is #"+findNodeIndex(id)+"#");
+            //console.log("(I) Duplicate check for "  +id+" is #"+findNodeIndex(id)+"#");
             if (findNodeIndex(id) === undefined) {
               nodes.push({"id": id,"color": color,"group":group});
-              console.log("addNode: added "+id+" group:"+group);
+              //console.log("addNode: added "+id+" group:"+group);
             } else {
-              console.log("addNode: NOT added "+id+": existing node id is "+findNodeIndex(id));
+              //console.log("addNode: NOT added "+id+": existing node id is "+findNodeIndex(id));
             }
             update();
         };
@@ -586,11 +821,12 @@ function nextval()
 
             // Restart the force layout.
             force
-                    .gravity(.00001)
-                    .charge(-80000)
-                    .friction(0.001)
+                    //.gravity(.00001)
+                    .gravity(0)
+                    .charge(-10000)
+                    .friction(0.0006)
                     //.linkDistance( function(d) { return d.value * 10 } )
-                    .linkDistance(50)
+                    .linkDistance(100)
                     .size([w, h])
                     .start();
         };
@@ -602,54 +838,53 @@ function nextval()
 
 
 
-    function drawGraph() {
-        graph = new myGraph("#svgdiv");
-        keepNodesOnTop();
-        // callback for the changes in the network
+function drawGraph() {
+	graph = new myGraph("#svgdiv");
+	//graph.keepNodesOnTop();
+}
+
+// because of the way the network is created, nodes are created first, and links second,
+// so the lines were on top of the nodes, this just reorders the DOM to put the svg:g on top
+function keepNodesOnTop() {
+	$(".nodeStrokeClass").each(function( index ) {
+		var gnode = this.parentNode;
+		gnode.parentNode.appendChild(gnode);
+	});
+}
 
 
-        //setTimeout(function() { graph.addNode('COMPANIES',"#1E90FF","Business"); keepNodesOnTop(); }, nextval());
-        //setTimeout(function() { graph.addNode('KING',"#1E90FF","Government"); keepNodesOnTop(); }, nextval());
-        //setTimeout(function() { graph.addLink('COMPANIES','KING',11); keepNodesOnTop(); }, nextval());
-        //setTimeout(function() { graph.addNode('UNITED STATES',"#1E90FF","Government"); keepNodesOnTop(); }, nextval());
-        //setTimeout(function() { graph.addLink('COMPANIES','UNITED STATES',11); keepNodesOnTop(); }, nextval());
-        //setTimeout(function() { graph.addNode('SCIENTIST',"#E6E6FA","Civilian"); keepNodesOnTop(); }, nextval());
-        //setTimeout(function() { graph.addNode('UNITED STATES',"#E6E6FA","Environment"); keepNodesOnTop(); }, nextval());
- }
 
-    //
-    // starts here
-    //
-    console.log("running drawGraph")
+
+function startHere()
+{
+    console.log("(I) startHere: starting")
     drawGraph();
-    console.log("step 1: create Consumer Instance  "+consumerInstanceName+" format "+format)
-
-    // Confluent rest-api stuff
+    console.log("(I) startHere: step 1: create Consumer Instance  "+consumerInstanceName+" format "+format)
+    // Confluent rest-api: query the Topics to find the latest one
     if (api == "v1") {
       AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
-      createConsumerInstance(consumerInstanceName,format, api, v1_getTopicRecords)
+      findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
     } else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
 
 
+    // Confluent rest-api: subscribe to a new consumer for the topic
+    if (api == "v1") {
+      AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
+      createConsumerInstance(consumerInstanceName,format, api, "publisher", v1_getTopicRecords)
+    } else {
+      createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
+    }
 
-    // because of the way the network is created, nodes are created first, and links second,
-    // so the lines were on top of the nodes, this just reorders the DOM to put the svg:g on top
-    function keepNodesOnTop() {
-        $(".nodeStrokeClass").each(function( index ) {
-            var gnode = this.parentNode;
-            gnode.parentNode.appendChild(gnode);
-        });
-    }
     function addNodes() {
-        d3.select("svg")
-                .remove();
-         drawGraph();
+        d3.select("svg").remove();
+        drawGraph();
     }
-//
-// end of new code
-//
+}
+
+
+
 
 </script>
 </body>
