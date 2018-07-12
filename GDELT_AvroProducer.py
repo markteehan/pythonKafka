@@ -99,10 +99,10 @@ def load(datafile, topic, server):
               , 'Site': match.group('SourceUrl').split("/")[2]
               }
               vStrTopic='{"'+topic+'":"'+str(match.group('EventId'))+'"}'
-              print(" producing topic for"+vStrTopic)
+              #print(" producing topic for"+vStrTopic)
               avroProducer_gdeltEvent.produce(topic=topic, value=data)
     avroProducer_gdeltEvent.flush()
-    print("Loaded topic "+topic+": ",count_gdeltEvent)
+    print("Loaded topic "+topic+":"+str(count_gdeltEvent))
 
 #def main():
  # my code here
