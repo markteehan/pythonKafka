@@ -5,8 +5,26 @@ import re
 
 from confluent_kafka import avro
 from confluent_kafka.avro import AvroProducer
-hostname='marks-MacBook.local'
+#hostname='marks-MacBook.local'
 count_gdeltEvente=0
+datafile = ''
+schema = ''
+topic = ""
+hostname = ""
+
+
+if len(sys.argv) > 1:
+     topic = sys.argv[1]
+if len(sys.argv) > 2:
+     datafile = sys.argv[2]
+if len(sys.argv) > 3:
+     hostname = sys.argv[3]
+
+server = hostname+':9092'
+print("(I) processing for topic "+topic+" and file "+datafile +" and hostname "+hostname)
+
+server = hostname+':9092'
+
 
 
 #
@@ -106,19 +124,6 @@ def load(datafile, topic, server):
 
 #def main():
  # my code here
-datafile = ''
-schema = ''
-topic = ""
-server = hostname+':9092'
-
-if len(sys.argv) > 1:
-     topic = sys.argv[1]
-if len(sys.argv) > 2:
-     datafile = sys.argv[2]
-print("(I) processing for topic "+topic+" and file "+datafile)
-
-server = hostname+':9092'
-
 #setupTopic_gdeltEvent(server, schema_registry_url,topic)
 count_gdeltEvent = 0
 

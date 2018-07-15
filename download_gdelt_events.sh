@@ -3,9 +3,14 @@
 #
 # iterate over [ YEAR ] [ MONTH ] DAY downloading a .csv.zip of global news stories per day
 #
+HOST=`hostname`
+if [ "$HOST" = "Mark-Teehan-MBP13.local" ]
+then
+  DIR=/Users/teehan/Data/GDELT/events
+  mkdir -p $DIR
+done
 
-DIR=/Users/markteehan/Data/GDELT/events
-mkdir -p ${DIR} 2>/dev/null
+
 cd ${DIR}
 
 TS=`date +"%Y%m%d"`
