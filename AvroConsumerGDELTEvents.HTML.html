@@ -2,10 +2,14 @@
 <html>
 <head>
     <title>Animated Force Chart</title>
-	<link href="jquery-ui-1.12.1.custom/jquery-ui.css" rel="stylesheet">
-	<script src="d3.min.js"></script>
-    <script src="jquery.min.js"></script>
-	<script src="jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+
+	<script src="https://d3js.org/d3.v3.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+
 
 
     <input name="startButton" type="button" value="Start" onclick="startHere()"/>
@@ -237,9 +241,10 @@ consumerInstanceName="MyC09"
 
 
 //topic="gdeltsmall1"
-//topic="GDELT_EVENT_20180703101500"
+topic="GDELT_EVENT02"
 format="avro"
 hostname="marks-MacBook.local"
+hostname="Mark-Teehan-MBP13.local"
 api="v1"
 
 
@@ -386,12 +391,6 @@ function v2_createConsumerSubscription(consumerInstance, groupName, pFormat, cal
 
 
 
-
-
-
-
-
-
 function v2_startConsuming(consumerInstance, groupName, pFormat, callbackfunction) {
   console.log("(I) startConsuming: Starting callback function startConsuming  for "+groupName)
   //setInterval(function() {
@@ -482,13 +481,14 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
   console.log("(D) Radioset setting is "+selectedVal)
 
   var       vMethod = 'GET'
-  var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"";
+  var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"?Xtimeout=3000&Xmax_bytes=300000"
   var nowProcessing=0
   var vHeaders="{Accept: 'application/vnd.kafka."   +pFormat   +".v1+json' }"  // hardcoded below - check why
 
   if (fetchOnce==0) {
       console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
-      setRestBox(vMethod+" "+vUri+" "+vHeaders)
+      console.log("about to run the consume")
+      //setRestBox(vMethod+" "+vUri+" "+vHeaders)
       $.ajax({
                   method: vMethod
                ,   async:false
@@ -498,6 +498,7 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
                , headers: {Accept: "application/vnd.kafka.avro.v1+json" }
       })
       .done(function(data) {
+        console.log("ran the consume")
         setResultBox(data,"green")
         console.log("(I) v1_getTopicRecords: Consumed some "+pFormat+" data of some size ")
         if (data.length == 0) {
@@ -863,22 +864,26 @@ function startHere()
     // Confluent rest-api: query the Topics to find the latest one
     if (api == "v1") {
       AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
-      findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
+      //findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
+      topic="GDELT_EVENT02"
     } else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
 
 
     // Confluent rest-api: subscribe to a new consumer for the topic
+    console.log("subscribing a new consumer")
     if (api == "v1") {
       AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
       createConsumerInstance(consumerInstanceName,format, api, "publisher", v1_getTopicRecords)
+      console.log("created the consumer instrance")
     } else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
 
     function addNodes() {
         d3.select("svg").remove();
+        console.log("running drawgraph")
         drawGraph();
     }
 }

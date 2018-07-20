@@ -41,7 +41,7 @@ regexp_gdeltEvent = re.compile("(?P<EventId>.*?)\t(?P<Day>.*?)\t(?P<MonthYear>.*
 
 
 def Produce_gdeltEvent(topic,data,key):
-  avroProducer_gdeltEvent.produce(topic=topic, value=data)
+  avroProducer_gdeltEvent.produce(topic=topic, value=data,key=key)
 
 
 def load(datafile, topic, server):
@@ -54,6 +54,11 @@ def load(datafile, topic, server):
           if     re.match(regexp_gdeltEvent, str(row)):
               match=re.match(regexp_gdeltEvent,row)
               count_gdeltEvent+=1
+
+              key = {
+              'EventId':match.group('EventId')
+              };
+
               data = {
               'EventId':match.group('EventId')
               , 'Day':match.group('Day')
@@ -118,14 +123,21 @@ def load(datafile, topic, server):
               }
               vStrTopic='{"'+topic+'":"'+str(match.group('EventId'))+'"}'
               #print(" producing topic for"+vStrTopic)
-              avroProducer_gdeltEvent.produce(topic=topic, value=data)
+              avroProducer_gdeltEvent.produce(topic=topic, value=data, key=key)
     avroProducer_gdeltEvent.flush()
     print("Loaded topic "+topic+":"+str(count_gdeltEvent))
 
-#def main():
- # my code here
-#setupTopic_gdeltEvent(server, schema_registry_url,topic)
 count_gdeltEvent = 0
+
+key_schema = """
+{"namespace": "gdelt.event.avro",
+      "type": "record",
+      "name": "REPLACEME_TOPIC_key",
+    "fields": [
+                {"name": "EventId" ,"type": ["null","string"],"default":null}
+              ]
+}""".replace("REPLACEME_TOPIC", topic);
+
 
 schema_values_str = """
 {"namespace": "gdelt.event.avro",
@@ -197,12 +209,14 @@ schema_values_str = """
 ]
 }""".replace("REPLACEME_TOPIC", topic)
 
+key_schema   = avro.loads(key_schema)
 value_schema = avro.loads(schema_values_str)
 
 
 avroProducer_gdeltEvent = AvroProducer({'bootstrap.servers': server
                                       , 'schema.registry.url': schema_registry_url}
                                       , default_value_schema=value_schema
+                                      ,   default_key_schema=key_schema
                                     )
 load(datafile, topic, server)
 avroProducer_gdeltEvent.flush()

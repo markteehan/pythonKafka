@@ -90,6 +90,9 @@ wgetfile()
 fi
 }
 
+
+get_latest_file()
+{
 for i in {0..14}
 do
   if [ "$MIN" = "$i" ]
@@ -123,10 +126,8 @@ do
   fi
 done
 
-
   DT2=`date -u +"%Y%m%d%H"`${MIN}
   DT=${DT2}00
-  #sleep 45
   echo "Time is ${DT} - fetching the next GDELT file!"
   cd $D
   rm -f ${DT}*
@@ -150,3 +151,7 @@ done
  else
    echo "wget http://data.gdeltproject.org/gdeltv2/${DT}.export.CSV.zip" >  ${DT}.export.CSV.zip.MISSING
  fi
+}  # end of get_latest_file
+
+
+get_latest_file
