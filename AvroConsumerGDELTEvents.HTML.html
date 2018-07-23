@@ -83,6 +83,11 @@
 
 <title>Animating Changes in Force Diagram</title>
 <div class="ui-widget">
+      <div id="cmdBox" name="cmdBox" class="ui-state-highlight ui-corner-all" style="margin-top: 2px; padding: 0 .7em;">
+		<p><span  style="float: left; margin-right: .3em;"></span></p>
+  	  </div>
+</div>
+<div class="ui-widget">
 	<div id="restBox" name="restBox"  class="ui-state-highlight ui-corner-all" style="margin-top: 2px; padding: 0 .7em;">
 		<p><span  style="float: left; margin-right: .3em;"></span></p>
 	</div>
@@ -93,11 +98,7 @@
 		<p><span   style="margin-left: .3em;float: left; margin-right: .3em;"></span></p>
 	</div>
 </div>
-<div class="ui-widget">
-      <div id="cmdBox" name="cmdBox" class="ui-state-highlight ui-corner-all" style="margin-top: 2px; padding: 0 .7em;">
-		<p><span  style="float: left; margin-right: .3em;"></span></p>
-  	  </div>
-</div>
+
 
 
 
@@ -158,7 +159,7 @@ function setRestBox(newText) {
   vFont="12px"
   vText=newText;
 
-  console.log("Setting restBox to "+newText);
+  //console.log("Setting restBox to "+newText);
 
   if (newText==='undefined') {
     vText="HTTP: no result"
@@ -184,12 +185,17 @@ function setRestBox(newText) {
 function setResultBox(newText,pColor) {
   vFont="14px"
   vText=""
-  vText=newText;
+  if (newText === undefined) {
+    vText="" }
+  else {
+     vText=newText
+  }
+
   if (vText.length>85) {
-    vText="[Returned]:  " + vText.toString().substring(0,85)+"..."
+    vText="[Returned]:  " + JSON.stringify(vText).toString().substring(0,100)+"..."
   }
   else {
-    vText="[Returned]:  " + vText.toString().substring(0,85)
+    vText="[Returned]:  " + JSON.stringify(vText).toString().substring(0,100)
   }
 
   $('#resultBox').text(vText);
@@ -237,13 +243,17 @@ hostname="localhost"
 api="v1"
 
 //# Test S05
-consumerInstanceName="MyC09"
+consumerInstanceName="My13"
 
 
 //topic="gdeltsmall1"
 topic="GDELT_EVENT02"
 format="avro"
 hostname="marks-MacBook.local"
+
+hostname="localhost"
+hostname="MarkTeehanMBP13"
+hostname="localhost"
 hostname="Mark-Teehan-MBP13.local"
 api="v1"
 
@@ -271,11 +281,15 @@ function findLatestTopic(groupname, pFormat, pApi, callbackfunction) {
   var       vMethod = 'GET'
   var jsonObject;
   var vContent_Type = ""
-        var vAccept = ""
-         var vAsync = "false"    // mandatory: process topics before creating the consumer instance
-           var vUri = base_uri + "topics"
-          var vData = ''
-        var vHeaders='{Accept: "application/vnd.kafka.'+pApi+'+json"}'
+  var vAccept = ""
+  var vAsync = "false"    // mandatory: process topics before creating the consumer instance
+  var vUri = base_uri + "topics"
+  var vData = ''
+	//var vHeaders='{Accept: "application/vnd.kafka.'+pApi+'+json",Content-Type:"application/x-www-form-urlencoded","Access-Control-Allow-Headers: POST, GET, PUT, DELETE, OPTIONS, HEAD, authorization"}'
+	//var vHeaders='{Accept: "application/vnd.kafka.'+pApi+'+json","Access-Control-Allow-Headers: POST, GET, PUT, DELETE, OPTIONS, HEAD, authorization"}'
+	//var vHeaders='{"Access-Control-Allow-Headers: POST, GET, PUT, DELETE, OPTIONS, HEAD, authorization"}'
+	//var vHeaders='{"Content-Type":"application/x-www-form-urlencoded"}'
+  var vHeaders='{Accept: "application/vnd.kafka.'+pApi+'+json"}'
 
   setCmdBox("(I) findLatestTopic: Querying topic names from "+base_uri+"topics")
   setRestBox(vMethod+" "+vUri+" "+vHeaders)
@@ -297,16 +311,16 @@ function findLatestTopic(groupname, pFormat, pApi, callbackfunction) {
       {
           jsonObject = data[i]
           if (typeof jsonObject !== 'undefined') {
-            if (jsonObject.search("GDELT_EVENT_20180707121500") > -1 && jsonObject > LatestGdeltSnapshot) {
-              console.log("(I) findLatestTopic: processing topic "+jsonObject+" (relevant="+jsonObject.search("GDELT")+")");
+            //console.log("Processing topic "+jsonObject+" and search is "+jsonObject.search("GDELT_EVENT")+" comparing with "+LatestGdeltSnapshot)
+            if (jsonObject.search("GDELT_EVENT") == 0 && jsonObject > LatestGdeltSnapshot) {
+              console.log("(I) findLatestTopic: newer topic "+jsonObject+" (relevant="+jsonObject.search("GDELT")+")");
               LatestGdeltSnapshot = jsonObject;
             }
            }
       }   //end of for loop
-      console.log("Finished iterating over topics")
       topic = LatestGdeltSnapshot;
-      setCmdBox("findLatestTopic: subscribing to topic "+jsonObject);
-      console.log("(I) findLatestTopic: subscribing to topic "+jsonObject);
+      setCmdBox("findLatestTopic: subscribing to topic "+topic);
+      console.log("(I) findLatestTopic: subscribing to topic "+topic);
     }
   })
   .fail(function(data) {
@@ -314,9 +328,6 @@ function findLatestTopic(groupname, pFormat, pApi, callbackfunction) {
     setResultBox(JSON.stringify(data),"red")
     console.log(JSON.stringify(data))
   });
-
-
-
 }
 
 
@@ -481,14 +492,15 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
   console.log("(D) Radioset setting is "+selectedVal)
 
   var       vMethod = 'GET'
-  var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"?Xtimeout=3000&Xmax_bytes=300000"
+  var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"?max_bytes=30000"
+  //var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic
   var nowProcessing=0
   var vHeaders="{Accept: 'application/vnd.kafka."   +pFormat   +".v1+json' }"  // hardcoded below - check why
 
   if (fetchOnce==0) {
-      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"/" )
+      console.log("(I) v1_getTopicRecords : consuming as application/vnd.kafka."+pFormat+".v1+json from "+ vUri )
       console.log("about to run the consume")
-      //setRestBox(vMethod+" "+vUri+" "+vHeaders)
+      setRestBox(vMethod+" "+vUri+" "+vHeaders)
       $.ajax({
                   method: vMethod
                ,   async:false
@@ -507,26 +519,27 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
 
         if (data.length != 0) {
           consumedMessages+=data.length;
-          //setCmdBox("Consuming messages ("+data.length+" messages consumed)")
+          setCmdBox("Consuming messages ("+data.length+" messages consumed)")
           console.log('(I) iterating over '+data.length+' records')
           for(var i = 0; i < data.length; i++)
           {
               var jsonObject = data[i]["value"]
-              //console.log(i+' of'+data.length+": Doing the JSON.parse for "+JSON.stringify(jsonObject).substring(1,50)    )
-              if (typeof jsonObject["EventId"] !== 'undefined') {
+              //console.log(i+' of '+data.length+": Doing the JSON.parse for "+JSON.stringify(jsonObject).substring(1,50)    )
+              //console.log("typeof jsonObject['EVENTID'] = "+typeof jsonObject["EVENTID"])
+              if (typeof jsonObject["EVENTID"] !== 'undefined') {
 
                 var localGdeltArray = {};
                 //console.log(localGdeltArray);
 
-                localGdeltArray.EventId          =stripString(jsonObject["EventId"]);
-                localGdeltArray.Actor1Code       =stripString(jsonObject["Actor1Code"]);
-                localGdeltArray.Actor1Type1Code  =stripString(jsonObject["Actor1Type1Code"]);
-                localGdeltArray.Actor1Name       =stripString(jsonObject["Actor1Name"]);
-                localGdeltArray.Actor2Name       =stripString(jsonObject["Actor2Name"]);
-                localGdeltArray.Actor1CountryCode=stripString(jsonObject["Actor1CountryCode"]);
-                localGdeltArray.Actor2CountryCode=stripString(jsonObject["Actor2CountryCode"]);
-                localGdeltArray.Avgtone          =stripString(jsonObject["AvgTone"]);
-                localGdeltArray.Site             =stripString(jsonObject["Site"]);
+                localGdeltArray.EventId          =stripString(jsonObject["EVENTID"]);
+                localGdeltArray.Actor1Code       =stripString(jsonObject["ACTOR1CODE"]);
+                localGdeltArray.Actor1Type1Code  =stripString(jsonObject["ACTOR1TYPE1CODE"]);
+                localGdeltArray.Actor1Name       =stripString(jsonObject["ACTOR1NAME"]);
+                localGdeltArray.Actor2Name       =stripString(jsonObject["ACTOR2NAME"]);
+                localGdeltArray.Actor1CountryCode=stripString(jsonObject["ACTOR1COUNTRYCODE"]);
+                localGdeltArray.Actor2CountryCode=stripString(jsonObject["ACTOR2COUNTRYCODE"]);
+                localGdeltArray.Avgtone          =stripString(jsonObject["AVGTONE"]);
+                localGdeltArray.Site             =stripString(jsonObject["SITE"]);
                 //console.log(" the localGdeltArray is "+localGdeltArray);
 
                 //gdeltArray.push(JSON.stringify(localGdeltArray));
@@ -543,12 +556,12 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
       fetchOnce=1;
     }
 
-    console.log("(I) finished consuming records. Delete the consumer here")
+    console.log("(I) finished consuming records: the D3 array has "+gdeltIndex+" entries to be plotted")
     vMethod = 'DELETE'
     vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance
     var vHeaders='{ Accept: "application/vnd.kafka.'+pFormat+'.v1+json" }'
 
-    //setRestBox(vMethod+" "+vUri+" "+vHeaders)
+    setRestBox(vMethod+" "+vUri+" "+vHeaders)
     $.ajax({
                   method:vMethod
                ,   async:false
@@ -558,7 +571,7 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
                , headers:vHeaders
          })
         .done(function(data) {
-          //setResultBox(data,"green")
+          setResultBox(data,"green")
           console.log("(I) v1_getTopicRecords: DELETE for consumer /instances/"+consumerInstance);
         })
         .fail(function(data) {
@@ -567,7 +580,6 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
           console.dir(data)
        })
        console.log("(I) this is where we will iterate over "+gdeltArray.length+" records");
-
        gdeltArray.forEach(function (arrayItem) {
        //if (arrayItem.Actor1Code == selectedCategory || selectedCategory == 'ALL') {
        if (2==2) {
@@ -717,8 +729,8 @@ function nextval()
         };
 
         // set up the D3 visualisation in the specified element
-        var w = 960,
-            h = 450;
+        var w = 1200,
+            h = 700;
 
         //var color = d3.scale.category10();
         var vis = d3.select("body")
@@ -864,15 +876,15 @@ function startHere()
     // Confluent rest-api: query the Topics to find the latest one
     if (api == "v1") {
       AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
-      //findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
       topic="GDELT_EVENT02"
+      findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
     } else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
 
 
     // Confluent rest-api: subscribe to a new consumer for the topic
-    console.log("subscribing a new consumer")
+    //console.log("subscribing a new consumer")
     if (api == "v1") {
       AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
       createConsumerInstance(consumerInstanceName,format, api, "publisher", v1_getTopicRecords)
@@ -887,10 +899,6 @@ function startHere()
         drawGraph();
     }
 }
-
-
-
-
 </script>
 </body>
 </html>

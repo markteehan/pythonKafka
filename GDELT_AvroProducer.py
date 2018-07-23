@@ -36,7 +36,8 @@ sys.setdefaultencoding('utf8')
 # 23-jun-2018 MT add GDELT
 countProduced=0
 schema_registry_url = 'http://'+hostname+':8081'
-regexp_gdeltEvent = re.compile("(?P<EventId>.*?)\t(?P<Day>.*?)\t(?P<MonthYear>.*?)\t(?P<Year>.*?)\t(?P<FractionDate>.*?)\t(?P<Actor1Code>.*?)\t(?P<Actor1Name>.*?)\t(?P<Actor1CountryCode>.*?)\t(?P<Actor1KnownGroupCode>.*?)\t(?P<Actor1EthnicCode>.*?)\t(?P<Actor1Religion1Code>.*?)\t(?P<Actor1Religion2Code>.*?)\t(?P<Actor1Type1Code>.*?)\t(?P<Actor1Type2Code>.*?)\t(?P<Actor1Type3Code>.*?)\t(?P<Actor2Code>.*?)\t(?P<Actor2Name>.*?)\t(?P<Actor2CountryCode>.*?)\t(?P<Actor2KnownGroupCode>.*?)\t(?P<Actor2EthnicCode>.*?)\t(?P<Actor2Religion1Code>.*?)\t(?P<Actor2Religion2Code>.*?)\t(?P<Actor2Type1Code>.*?)\t(?P<Actor2Type2Code>.*?)\t(?P<Actor2Type3Code>.*?)\t(?P<IsRootEvent>.*?)\t(?P<EventCode>.*?)\t(?P<EventBaseCode>.*?)\t(?P<EventRootCode>.*?)\t(?P<QuadClass>.*?)\t(?P<GoldsteinScale>.*?)\t(?P<NumMentions>.*?)\t(?P<NumSources>.*?)\t(?P<NumArticles>.*?)\t(?P<AvgTone>.*?)\t(?P<Actor1Geo_Type>.*?)\t(?P<Actor1Geo_FullName>.*?)\t(?P<Actor1Geo_CountryCode>.*?)\t(?P<Actor1Geo_ADM1Code>.*?)\t(?P<Actor1Geo_ADM2Code>.*?)\t(?P<Actor1Geo_Lat>.*?)\t(?P<Actor1Geo_Long>.*?)\t(?P<Actor1Geo_FeatureID>.*?)\t(?P<Actor2Geo_Type>.*?)\t(?P<Actor2Geo_FullName>.*?)\t(?P<Actor2Geo_CountryCode>.*?)\t(?P<Actor2Geo_ADM1Code>.*?)\t(?P<Actor2Geo_ADM2Code>.*?)\t(?P<Actor2Geo_Lat>.*?)\t(?P<Actor2Geo_Long>.*?)\t(?P<Actor2Geo_FeatureID>.*?)\t(?P<ActionGeo_Type>.*?)\t(?P<ActionGeo_FullName>.*?)\t(?P<ActionGeo_CountryCode>.*?)\t(?P<ActionGeo_ADM1Code>.*?)\t(?P<ActionGeo_ADM2Code>.*?)\t(?P<ActionGeo_Lat>.*?)\t(?P<ActionGeo_Long>.*?)\t(?P<ActionGeo_FeatureID>.*?)\t(?P<DateAdded>.*?)\t(?P<SourceUrl>.*)")
+#REGEXP_GDELTEVENT = RE.COMPILE("(?P<EVENTID>.*?)\t(?P<DAY>.*?)\t(?P<MONTHYEAR>.*?)\t(?P<YEAR>.*?)\t(?P<FRACTIONDATE>.*?)\t(?P<ACTOR1CODE>.*?)\t(?P<ACTOR1NAME>.*?)\t(?P<ACTOR1COUNTRYCODE>.*?)\t(?P<ACTOR1KNOWNGROUPCODE>.*?)\t(?P<ACTOR1ETHNICCODE>.*?)\t(?P<ACTOR1RELIGION1CODE>.*?)\t(?P<ACTOR1RELIGION2CODE>.*?)\t(?P<ACTOR1TYPE1CODE>.*?)\t(?P<ACTOR1TYPE2CODE>.*?)\t(?P<ACTOR1TYPE3CODE>.*?)\t(?P<ACTOR2CODE>.*?)\t(?P<ACTOR2NAME>.*?)\t(?P<ACTOR2COUNTRYCODE>.*?)\t(?P<ACTOR2KNOWNGROUPCODE>.*?)\t(?P<ACTOR2ETHNICCODE>.*?)\t(?P<ACTOR2RELIGION1CODE>.*?)\t(?P<ACTOR2RELIGION2CODE>.*?)\t(?P<ACTOR2TYPE1CODE>.*?)\t(?P<ACTOR2TYPE2CODE>.*?)\t(?P<ACTOR2TYPE3CODE>.*?)\t(?P<ISROOTEVENT>.*?)\t(?P<EVENTCODE>.*?)\t(?P<EVENTBASECODE>.*?)\t(?P<EVENTROOTCODE>.*?)\t(?P<QUADCLASS>.*?)\t(?P<GOLDSTEINSCALE>.*?)\t(?P<NUMMENTIONS>.*?)\t(?P<NUMSOURCES>.*?)\t(?P<NUMARTICLES>.*?)\t(?P<AVGTONE>.*?)\t(?P<ACTOR1GEO_TYPE>.*?)\t(?P<ACTOR1GEO_FULLNAME>.*?)\t(?P<ACTOR1GEO_COUNTRYCODE>.*?)\t(?P<ACTOR1GEO_ADM1CODE>.*?)\t(?P<ACTOR1GEO_ADM2CODE>.*?)\t(?P<ACTOR1GEO_LAT>.*?)\t(?P<ACTOR1GEO_LONG>.*?)\t(?P<ACTOR1GEO_FEATUREID>.*?)\t(?P<ACTOR2GEO_TYPE>.*?)\t(?P<ACTOR2GEO_FULLNAME>.*?)\t(?P<ACTOR2GEO_COUNTRYCODE>.*?)\t(?P<ACTOR2GEO_ADM1CODE>.*?)\t(?P<ACTOR2GEO_ADM2CODE>.*?)\t(?P<ACTOR2GEO_LAT>.*?)\t(?P<ACTOR2GEO_LONG>.*?)\t(?P<ACTOR2GEO_FEATUREID>.*?)\t(?P<ACTIONGEO_TYPE>.*?)\t(?P<ACTIONGEO_FULLNAME>.*?)\t(?P<ACTIONGEO_COUNTRYCODE>.*?)\t(?P<ACTIONGEO_ADM1CODE>.*?)\t(?P<ACTIONGEO_ADM2CODE>.*?)\t(?P<ACTIONGEO_LAT>.*?)\t(?P<ACTIONGEO_LONG>.*?)\t(?P<ACTIONGEO_FEATUREID>.*?)\t(?P<DATEADDED>.*?)\t(?P<SOURCEURL>.*)")
+regexp_gdeltEvent = re.compile("(?P<EVENTID>.*?)\t(?P<DAY>.*?)\t(?P<MONTHYEAR>.*?)\t(?P<YEAR>.*?)\t(?P<FRACTIONDATE>.*?)\t(?P<ACTOR1CODE>.*?)\t(?P<ACTOR1NAME>.*?)\t(?P<ACTOR1COUNTRYCODE>.*?)\t(?P<ACTOR1KNOWNGROUPCODE>.*?)\t(?P<ACTOR1ETHNICCODE>.*?)\t(?P<ACTOR1RELIGION1CODE>.*?)\t(?P<ACTOR1RELIGION2CODE>.*?)\t(?P<ACTOR1TYPE1CODE>.*?)\t(?P<ACTOR1TYPE2CODE>.*?)\t(?P<ACTOR1TYPE3CODE>.*?)\t(?P<ACTOR2CODE>.*?)\t(?P<ACTOR2NAME>.*?)\t(?P<ACTOR2COUNTRYCODE>.*?)\t(?P<ACTOR2KNOWNGROUPCODE>.*?)\t(?P<ACTOR2ETHNICCODE>.*?)\t(?P<ACTOR2RELIGION1CODE>.*?)\t(?P<ACTOR2RELIGION2CODE>.*?)\t(?P<ACTOR2TYPE1CODE>.*?)\t(?P<ACTOR2TYPE2CODE>.*?)\t(?P<ACTOR2TYPE3CODE>.*?)\t(?P<ISROOTEVENT>.*?)\t(?P<EVENTCODE>.*?)\t(?P<EVENTBASECODE>.*?)\t(?P<EVENTROOTCODE>.*?)\t(?P<QUADCLASS>.*?)\t(?P<GOLDSTEINSCALE>.*?)\t(?P<NUMMENTIONS>.*?)\t(?P<NUMSOURCES>.*?)\t(?P<NUMARTICLES>.*?)\t(?P<AVGTONE>.*?)\t(?P<ACTOR1GEO_TYPE>.*?)\t(?P<ACTOR1GEO_FULLNAME>.*?)\t(?P<ACTOR1GEO_COUNTRYCODE>.*?)\t(?P<ACTOR1GEO_ADM1CODE>.*?)\t(?P<ACTOR1GEO_ADM2CODE>.*?)\t(?P<ACTOR1GEO_LAT>.*?)\t(?P<ACTOR1GEO_LONG>.*?)\t(?P<ACTOR1GEO_FEATUREID>.*?)\t(?P<ACTOR2GEO_TYPE>.*?)\t(?P<ACTOR2GEO_FULLNAME>.*?)\t(?P<ACTOR2GEO_COUNTRYCODE>.*?)\t(?P<ACTOR2GEO_ADM1CODE>.*?)\t(?P<ACTOR2GEO_ADM2CODE>.*?)\t(?P<ACTOR2GEO_LAT>.*?)\t(?P<ACTOR2GEO_LONG>.*?)\t(?P<ACTOR2GEO_FEATUREID>.*?)\t(?P<ACTIONGEO_TYPE>.*?)\t(?P<ACTIONGEO_FULLNAME>.*?)\t(?P<ACTIONGEO_COUNTRYCODE>.*?)\t(?P<ACTIONGEO_ADM1CODE>.*?)\t(?P<ACTIONGEO_ADM2CODE>.*?)\t(?P<ACTIONGEO_LAT>.*?)\t(?P<ACTIONGEO_LONG>.*?)\t(?P<ACTIONGEO_FEATUREID>.*?)\t(?P<DATEADDED>.*?)\t(?P<SOURCEURL>.*)")
 # Match any character until space [^\s]+
 
 
@@ -56,85 +57,89 @@ def load(datafile, topic, server):
               count_gdeltEvent+=1
 
               key = {
-              'EventId':match.group('EventId')
+             'EVENTID': match.group('EVENTID')
+              };
+
+              key = {
+                  'MONTHYEAR': match.group('MONTHYEAR')
               };
 
               data = {
-              'EventId':match.group('EventId')
-              , 'Day':match.group('Day')
-              , 'MonthYear':match.group('MonthYear')
-              , 'Year':match.group('Year')
-              , 'FractionDate':match.group('FractionDate')
-              , 'Actor1Code':match.group('Actor1Code')
-              , 'Actor1Name':match.group('Actor1Name')
-              , 'Actor1CountryCode':match.group('Actor1CountryCode')
-              , 'Actor1KnownGroupCode':match.group('Actor1KnownGroupCode')
-              , 'Actor1EthnicCode':match.group('Actor1EthnicCode')
-              , 'Actor1Religion1Code':match.group('Actor1Religion1Code')
-              , 'Actor1Religion2Code':match.group('Actor1Religion2Code')
-              , 'Actor1Type1Code':match.group('Actor1Type1Code')
-              , 'Actor1Type2Code':match.group('Actor1Type2Code')
-              , 'Actor1Type3Code':match.group('Actor1Type3Code')
-              , 'Actor2Code':match.group('Actor2Code')
-              , 'Actor2Name':match.group('Actor2Name')
-              , 'Actor2CountryCode':match.group('Actor2CountryCode')
-              , 'Actor2KnownGroupCode':match.group('Actor2KnownGroupCode')
-              , 'Actor2EthnicCode':match.group('Actor2EthnicCode')
-              , 'Actor2Religion1Code':match.group('Actor2Religion1Code')
-              , 'Actor2Religion2Code':match.group('Actor2Religion2Code')
-              , 'Actor2Type1Code':match.group('Actor2Type1Code')
-              , 'Actor2Type2Code':match.group('Actor2Type2Code')
-              , 'Actor2Type3Code':match.group('Actor2Type3Code')
-              , 'IsRootEvent':match.group('IsRootEvent')
-              , 'EventCode':match.group('EventCode')
-              , 'EventBaseCode':match.group('EventBaseCode')
-              , 'EventRootCode':match.group('EventRootCode')
-              , 'QuadClass':match.group('QuadClass')
-              , 'GoldsteinScale':match.group('GoldsteinScale')
-              , 'NumMentions':match.group('NumMentions')
-              , 'NumSources':match.group('NumSources')
-              , 'NumArticles':match.group('NumArticles')
-              , 'AvgTone':match.group('AvgTone')
-              , 'Actor1Geo_Type':match.group('Actor1Geo_Type')
-              , 'Actor1Geo_FullName':match.group('Actor1Geo_FullName')
-              , 'Actor1Geo_CountryCode':match.group('Actor1Geo_CountryCode')
-              , 'Actor1Geo_ADM1Code':match.group('Actor1Geo_ADM1Code')
-              , 'Actor1Geo_ADM2Code':match.group('Actor1Geo_ADM2Code')
-              , 'Actor1Geo_Lat':match.group('Actor1Geo_Lat')
-              , 'Actor1Geo_Long':match.group('Actor1Geo_Long')
-              , 'Actor1Geo_FeatureID':match.group('Actor1Geo_FeatureID')
-              , 'Actor2Geo_Type':match.group('Actor2Geo_Type')
-              , 'Actor2Geo_FullName':match.group('Actor2Geo_FullName')
-              , 'Actor2Geo_CountryCode':match.group('Actor2Geo_CountryCode')
-              , 'Actor2Geo_ADM1Code':match.group('Actor2Geo_ADM1Code')
-              , 'Actor2Geo_Lat':match.group('Actor2Geo_Lat')
-              , 'Actor2Geo_Long':match.group('Actor2Geo_Long')
-              , 'Actor2Geo_FeatureID':match.group('Actor2Geo_FeatureID')
-              , 'ActionGeo_Type':match.group('ActionGeo_Type')
-              , 'ActionGeo_FullName':match.group('ActionGeo_FullName')
-              , 'ActionGeo_CountryCode':match.group('ActionGeo_CountryCode')
-              , 'ActionGeo_ADM1Code':match.group('ActionGeo_ADM1Code')
-              , 'ActionGeo_Lat':match.group('ActionGeo_Lat')
-              , 'ActionGeo_Long':match.group('ActionGeo_Long')
-              , 'ActionGeo_FeatureID':match.group('ActionGeo_FeatureID')
-              , 'DateAdded':match.group('DateAdded')
-              , 'SourceUrl':match.group('SourceUrl')
-              , 'Site': match.group('SourceUrl').split("/")[2]
+                    'EVENTID': match.group('EVENTID')
+                  , 'DAY': match.group('DAY')
+                  , 'MONTHYEAR': match.group('MONTHYEAR')
+                  , 'YEAR': match.group('YEAR')
+                  , 'FRACTIONDATE': match.group('FRACTIONDATE')
+                  , 'ACTOR1CODE': match.group('ACTOR1CODE')
+                  , 'ACTOR1NAME': match.group('ACTOR1NAME')
+                  , 'ACTOR1COUNTRYCODE': match.group('ACTOR1COUNTRYCODE')
+                  , 'ACTOR1KNOWNGROUPCODE': match.group('ACTOR1KNOWNGROUPCODE')
+                  , 'ACTOR1ETHNICCODE': match.group('ACTOR1ETHNICCODE')
+                  , 'ACTOR1RELIGION1CODE': match.group('ACTOR1RELIGION1CODE')
+                  , 'ACTOR1RELIGION2CODE': match.group('ACTOR1RELIGION2CODE')
+                  , 'ACTOR1TYPE1CODE': match.group('ACTOR1TYPE1CODE')
+                  , 'ACTOR1TYPE2CODE': match.group('ACTOR1TYPE2CODE')
+                  , 'ACTOR1TYPE3CODE': match.group('ACTOR1TYPE3CODE')
+                  , 'ACTOR2CODE': match.group('ACTOR2CODE')
+                  , 'ACTOR2NAME': match.group('ACTOR2NAME')
+                  , 'ACTOR2COUNTRYCODE': match.group('ACTOR2COUNTRYCODE')
+                  , 'ACTOR2KNOWNGROUPCODE': match.group('ACTOR2KNOWNGROUPCODE')
+                  , 'ACTOR2ETHNICCODE': match.group('ACTOR2ETHNICCODE')
+                  , 'ACTOR2RELIGION1CODE': match.group('ACTOR2RELIGION1CODE')
+                  , 'ACTOR2RELIGION2CODE': match.group('ACTOR2RELIGION2CODE')
+                  , 'ACTOR2TYPE1CODE': match.group('ACTOR2TYPE1CODE')
+                  , 'ACTOR2TYPE2CODE': match.group('ACTOR2TYPE2CODE')
+                  , 'ACTOR2TYPE3CODE': match.group('ACTOR2TYPE3CODE')
+                  , 'ISROOTEVENT': match.group('ISROOTEVENT')
+                  , 'EVENTCODE': match.group('EVENTCODE')
+                  , 'EVENTBASECODE': match.group('EVENTBASECODE')
+                  , 'EVENTROOTCODE': match.group('EVENTROOTCODE')
+                  , 'QUADCLASS': match.group('QUADCLASS')
+                  , 'GOLDSTEINSCALE': match.group('GOLDSTEINSCALE')
+                  , 'NUMMENTIONS': match.group('NUMMENTIONS')
+                  , 'NUMSOURCES': match.group('NUMSOURCES')
+                  , 'NUMARTICLES': match.group('NUMARTICLES')
+                  , 'AVGTONE': match.group('AVGTONE')
+                  , 'ACTOR1GEO_TYPE': match.group('ACTOR1GEO_TYPE')
+                  , 'ACTOR1GEO_FULLNAME': match.group('ACTOR1GEO_FULLNAME')
+                  , 'ACTOR1GEO_COUNTRYCODE': match.group('ACTOR1GEO_COUNTRYCODE')
+                  , 'ACTOR1GEO_ADM1CODE': match.group('ACTOR1GEO_ADM1CODE')
+                  , 'ACTOR1GEO_ADM2CODE': match.group('ACTOR1GEO_ADM2CODE')
+                  , 'ACTOR1GEO_LAT': match.group('ACTOR1GEO_LAT')
+                  , 'ACTOR1GEO_LONG': match.group('ACTOR1GEO_LONG')
+                  , 'ACTOR1GEO_FEATUREID': match.group('ACTOR1GEO_FEATUREID')
+                  , 'ACTOR2GEO_TYPE': match.group('ACTOR2GEO_TYPE')
+                  , 'ACTOR2GEO_FULLNAME': match.group('ACTOR2GEO_FULLNAME')
+                  , 'ACTOR2GEO_COUNTRYCODE': match.group('ACTOR2GEO_COUNTRYCODE')
+                  , 'ACTOR2GEO_ADM1CODE': match.group('ACTOR2GEO_ADM1CODE')
+                  , 'ACTOR2GEO_LAT': match.group('ACTOR2GEO_LAT')
+                  , 'ACTOR2GEO_LONG': match.group('ACTOR2GEO_LONG')
+                  , 'ACTOR2GEO_FEATUREID': match.group('ACTOR2GEO_FEATUREID')
+                  , 'ACTIONGEO_TYPE': match.group('ACTIONGEO_TYPE')
+                  , 'ACTIONGEO_FULLNAME': match.group('ACTIONGEO_FULLNAME')
+                  , 'ACTIONGEO_COUNTRYCODE': match.group('ACTIONGEO_COUNTRYCODE')
+                  , 'ACTIONGEO_ADM1CODE': match.group('ACTIONGEO_ADM1CODE')
+                  , 'ACTIONGEO_LAT': match.group('ACTIONGEO_LAT')
+                  , 'ACTIONGEO_LONG': match.group('ACTIONGEO_LONG')
+                  , 'ACTIONGEO_FEATUREID': match.group('ACTIONGEO_FEATUREID')
+                  , 'DATEADDED': match.group('DATEADDED')
+                  , 'SOURCEURL': match.group('SOURCEURL')
+                  , 'SITE': match.group('SOURCEURL').split("/")[2]
               }
-              vStrTopic='{"'+topic+'":"'+str(match.group('EventId'))+'"}'
+              vStrTopic='{"'+topic+'":"'+str(match.group('EVENTID'))+'"}'
               #print(" producing topic for"+vStrTopic)
               avroProducer_gdeltEvent.produce(topic=topic, value=data, key=key)
     avroProducer_gdeltEvent.flush()
     print("Loaded topic "+topic+":"+str(count_gdeltEvent))
 
 count_gdeltEvent = 0
-
+//{"name": "EVENTID" ,"type": ["null","string"],"default":null}
 key_schema = """
 {"namespace": "gdelt.event.avro",
       "type": "record",
       "name": "REPLACEME_TOPIC_key",
     "fields": [
-                {"name": "EventId" ,"type": ["null","string"],"default":null}
+               {"name": "MONTHYEAR" ,"type": ["null","string"],"default":null}               
               ]
 }""".replace("REPLACEME_TOPIC", topic);
 
@@ -144,68 +149,68 @@ schema_values_str = """
 "type": "record",
 "name": "REPLACEME_TOPIC",
 "fields": [
-{"name": "EventId" ,"type": ["null","string"],"default":null}
-,{"name": "Day" ,"type": ["null","string"],"default":null}
-,{"name": "MonthYear" ,"type": ["null","string"],"default":null}
-,{"name": "Year" ,"type": ["null","string"],"default":null}
-,{"name": "FractionDate" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Name" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1CountryCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1KnownGroupCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1EthnicCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Religion1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Religion2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Type1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Type2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Type3Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Name" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2CountryCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2KnownGroupCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2EthnicCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Religion1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Religion2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Type1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Type2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Type3Code" ,"type": ["null","string"],"default":null}
-,{"name": "IsRootEvent" ,"type": ["null","string"],"default":null}
-,{"name": "EventCode" ,"type": ["null","string"],"default":null}
-,{"name": "EventBaseCode" ,"type": ["null","string"],"default":null}
-,{"name": "EventRootCode" ,"type": ["null","string"],"default":null}
-,{"name": "QuadClass" ,"type": ["null","string"],"defaulet":null}
-,{"name": "GoldsteinScale" ,"type": ["null","string"],"default":null}
-,{"name": "NumMentions" ,"type": ["null","string"],"default":null}
-,{"name": "NumSources" ,"type": ["null","string"],"default":null}
-,{"name": "NumArticles" ,"type": ["null","string"],"default":null}
-,{"name": "AvgTone" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_Type" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_FullName" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_CountryCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_ADM1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_ADM2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_Lat" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_Long" ,"type": ["null","string"],"default":null}
-,{"name": "Actor1Geo_FeatureID" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_Type" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_FullName" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_CountryCode" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_ADM1Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_ADM2Code" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_Lat" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_Long" ,"type": ["null","string"],"default":null}
-,{"name": "Actor2Geo_FeatureID" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_Type" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_FullName" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_CountryCode" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_ADM1Code" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_ADM2Code" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_Lat" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_Long" ,"type": ["null","string"],"default":null}
-,{"name": "ActionGeo_FeatureID" ,"type": ["null","string"],"default":null}
-,{"name": "DateAdded" ,"type": ["null","string"],"default":null}
-,{"name": "SourceUrl" ,"type": ["null","string"],"default":null}
-,{"name": "Site" ,"type": ["null","string"],"default":null}
+{ "name": "EVENTID" ,"type": ["null","string"],"default":null}
+,{"name": "DAY" ,"type": ["null","string"],"default":null}
+,{"name": "MONTHYEAR" ,"type": ["null","string"],"default":null}
+,{"name": "YEAR" ,"type": ["null","string"],"default":null}
+,{"name": "FRACTIONDATE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1NAME" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1COUNTRYCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1KNOWNGROUPCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1ETHNICCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1RELIGION1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1RELIGION2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1TYPE1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1TYPE2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1TYPE3CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2NAME" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2COUNTRYCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2KNOWNGROUPCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2ETHNICCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2RELIGION1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2RELIGION2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2TYPE1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2TYPE2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2TYPE3CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ISROOTEVENT" ,"type": ["null","string"],"default":null}
+,{"name": "EVENTCODE" ,"type": ["null","string"],"default":null}
+,{"name": "EVENTBASECODE" ,"type": ["null","string"],"default":null}
+,{"name": "EVENTROOTCODE" ,"type": ["null","string"],"default":null}
+,{"name": "QUADCLASS" ,"type": ["null","string"],"DEFAULET":null}
+,{"name": "GOLDSTEINSCALE" ,"type": ["null","string"],"default":null}
+,{"name": "NUMMENTIONS" ,"type": ["null","string"],"default":null}
+,{"name": "NUMSOURCES" ,"type": ["null","string"],"default":null}
+,{"name": "NUMARTICLES" ,"type": ["null","string"],"default":null}
+,{"name": "AVGTONE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_TYPE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_FULLNAME" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_COUNTRYCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_ADM1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_ADM2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_LAT" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_LONG" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR1GEO_FEATUREID" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_TYPE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_FULLNAME" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_COUNTRYCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_ADM1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_ADM2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_LAT" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_LONG" ,"type": ["null","string"],"default":null}
+,{"name": "ACTOR2GEO_FEATUREID" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_TYPE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_FULLNAME" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_COUNTRYCODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_ADM1CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_ADM2CODE" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_LAT" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_LONG" ,"type": ["null","string"],"default":null}
+,{"name": "ACTIONGEO_FEATUREID" ,"type": ["null","string"],"default":null}
+,{"name": "DATEADDED" ,"type": ["null","string"],"default":null}
+,{"name": "SOURCEURL" ,"type": ["null","string"],"default":null}
+,{"name": "SITE" ,"type": ["null","string"],"default":null}
 ]
 }""".replace("REPLACEME_TOPIC", topic)
 
