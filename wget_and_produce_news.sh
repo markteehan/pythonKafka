@@ -228,7 +228,7 @@ load_file()
         TARGET_ROWS=`cat $F | wc -l|sed 's/ //g'`
         check_topic_count GDELT_EVENT02 ${F} $TARGET_ROWS
     else
-        echo "(I) ${PREFIX} Data for ${DAY} ${HOUR} ${INTERVAL} - unable to find file on GDELT server ${FILE}"
+        echo "(I) ${PREFIX} Data for ${DAY} ${HOUR} ${INTERVAL} - unable to find file ${FILE}"
     fi
 }  # end of get_file
 
@@ -260,8 +260,8 @@ do
     HOUR=`printf "%02d\n" ${HOUR_1}`
     for INTERVAL in `echo ${INTERVALS}`
     do
-      get_file ${DAY}${HOUR}${INTERVAL} DONT_RETRY $CURRENT_UTC_INTERVAL
-      #load_file ${DAY}${HOUR}${INTERVAL} DONT_RETRY $CURRENT_UTC_INTERVAL
+      #get_file ${DAY}${HOUR}${INTERVAL} DONT_RETRY $CURRENT_UTC_INTERVAL
+      load_file ${DAY}${HOUR}${INTERVAL} DONT_RETRY $CURRENT_UTC_INTERVAL
     done
   done
 done

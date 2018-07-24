@@ -48,6 +48,7 @@ def Produce_gdeltEvent(topic,data,key):
 def load(datafile, topic, server):
     global count_gdeltEvent
     global avroProducer_gdeltEvent
+    flusher=0
     with open(datafile) as f:
       for row in f.readlines():
           if not re.match(regexp_gdeltEvent, str(row)):
@@ -129,11 +130,16 @@ def load(datafile, topic, server):
               vStrTopic='{"'+topic+'":"'+str(match.group('EVENTID'))+'"}'
               #print(" producing topic for"+vStrTopic)
               avroProducer_gdeltEvent.produce(topic=topic, value=data, key=key)
-    avroProducer_gdeltEvent.flush()
+              flusher = flusher + 1
+              # "commit" every 100 messages. Otherwise its slow as a dog
+              if flusher == 100:
+                avroProducer_gdeltEvent.flush()
+                flusher=0
+
     print("Loaded topic "+topic+":"+str(count_gdeltEvent))
 
 count_gdeltEvent = 0
-//{"name": "EVENTID" ,"type": ["null","string"],"default":null}
+#{"name": "EVENTID" ,"type": ["null","string"],"default":null}
 key_schema = """
 {"namespace": "gdelt.event.avro",
       "type": "record",
