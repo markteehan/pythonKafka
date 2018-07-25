@@ -131,8 +131,8 @@ def load(datafile, topic, server):
               #print(" producing topic for"+vStrTopic)
               avroProducer_gdeltEvent.produce(topic=topic, value=data, key=key)
               flusher = flusher + 1
-              # "commit" every 100 messages. Otherwise its slow as a dog
-              if flusher == 100:
+              # "commit" every 5000 messages. Otherwise its slow as a dog
+              if flusher == 5000:
                 avroProducer_gdeltEvent.flush()
                 flusher=0
 
