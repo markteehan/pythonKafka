@@ -121,6 +121,7 @@
 
 var selectedCategory="ALL"
 var consumedMessages=0;
+var omitNodes=["AUSTRALIA"];
 
 $(document).ready(function() {
     $('input:radio[name=selectCategory]').change(function() {
@@ -133,6 +134,8 @@ $(document).ready(function() {
         }
     });
 });
+
+
 
 
 function setCmdBox(newText) {
@@ -243,7 +246,7 @@ hostname="localhost"
 api="v1"
 
 //# Test S05
-consumerInstanceName="My13"
+consumerInstanceName="My14"
 
 
 //topic="gdeltsmall1"
@@ -312,7 +315,7 @@ function findLatestTopic(groupname, pFormat, pApi, callbackfunction) {
           jsonObject = data[i]
           if (typeof jsonObject !== 'undefined') {
             //console.log("Processing topic "+jsonObject+" and search is "+jsonObject.search("GDELT_EVENT")+" comparing with "+LatestGdeltSnapshot)
-            if (jsonObject.search("GDELT_EVENT") == 0 && jsonObject > LatestGdeltSnapshot) {
+            if (jsonObject.search("GDELT") == 0 && jsonObject > LatestGdeltSnapshot) {
               console.log("(I) findLatestTopic: newer topic "+jsonObject+" (relevant="+jsonObject.search("GDELT")+")");
               LatestGdeltSnapshot = jsonObject;
             }
@@ -492,6 +495,7 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
   console.log("(D) Radioset setting is "+selectedVal)
 
   var       vMethod = 'GET'
+  var vColor=""
   var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic+"?max_bytes=30000"
   //var vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance+"/topics/"+topic
   var nowProcessing=0
@@ -560,8 +564,10 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
     vMethod = 'DELETE'
     vUri = consumer_base_uri + groupName + "/instances/"+consumerInstance
     var vHeaders='{ Accept: "application/vnd.kafka.'+pFormat+'.v1+json" }'
+    var vSize=12
 
     setRestBox(vMethod+" "+vUri+" "+vHeaders)
+
     $.ajax({
                   method:vMethod
                ,   async:false
@@ -581,69 +587,61 @@ function v1_getTopicRecords(consumerInstance, groupName, pFormat,chartType, call
        })
        console.log("(I) this is where we will iterate over "+gdeltArray.length+" records");
        gdeltArray.forEach(function (arrayItem) {
-       //if (arrayItem.Actor1Code == selectedCategory || selectedCategory == 'ALL') {
-       if (2==2) {
-             nowProcessing=nowProcessing+1;
-             if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor1CountryCode>"") {
+		 nowProcessing=nowProcessing+1;
 
-               setTimeout(function() { graph.addNode(
-               arrayItem.Actor1Name
-               ,nodecolor(arrayItem.Avgtone)
-               ,arrayItem.Actor1Code
-               ,nowProcessing
-               ); keepNodesOnTop(); }, nextval());
+		 //console.log(typeof nowProcessing + "PLOTTING Tone is "+arrayItem.Avgtone+" for actor "+ arrayItem.Actor1Name)
+		 if (Number(arrayItem.Avgtone) == 0)  { console.log("ZERO    : Tone is "+arrayItem.Avgtone+" for actor "+ arrayItem.Actor1Name);vColor='GREY' }
+		 if (Number(arrayItem.Avgtone) <  0)  { console.log("NEGATIVE: Tone is "+arrayItem.Avgtone+" for actor "+ arrayItem.Actor1Name);vColor='RED' }
+		 if (Number(arrayItem.Avgtone) >  0)  { console.log("POSITIVE: Tone is "+arrayItem.Avgtone+" for actor "+ arrayItem.Actor1Name);vColor='GREEN' }
 
-               if (chartType="country") {
-                 setTimeout(function() { graph.addNode(
-                 arrayItem.Actor1CountryCode
-                 ,"#1E90FF"
-                 ,arrayItem.Actor1Code
-                 ,nowProcessing
-                 ); keepNodesOnTop(); }, nextval());
+		 if (arrayItem.Actor1Name!==undefined && (Number(arrayItem.Avgtone) < -1 || Number(arrayItem.Avgtone) > 1)) {
 
-                 setTimeout(function() { graph.addLink(
-                  arrayItem.Actor1Name
-                 ,arrayItem.Actor1CountryCode
-                 ,3); keepNodesOnTop(); }, nextval());
-               }
+		   var tone=Math.abs(arrayItem.Avgtone);
+		   if (tone == 0)              {vSize=12}
+		   if (tone > 0 &&  tone <= 1) {vSize= 13}
+		   if (tone > 1 &&  tone <= 2) {vSize= 14}
+		   if (tone > 2 &&  tone <= 3) {vSize= 15}
+	       if (tone > 3 &&  tone <= 4) {vSize= 16}
+ 		   if (tone > 4 )              {vSize= 17}
+ 		   if (tone > 5 )              {vSize= 18}
+ 		   if (tone > 6 )              {vSize= 19}
+ 		   if (tone > 7 )              {vSize= 20}
 
-               if (chartType="publisher") {
-                 setTimeout(function() { graph.addNode(
-                 arrayItem.Site
-                 ,"purple"
-                 ,arrayItem.Actor1Code
-                 ,nowProcessing
-                 ); keepNodesOnTop(); }, nextval());
+		   setTimeout(function() { graph.addNode( arrayItem.Actor1Name,vColor,vSize); keepNodesOnTop(); }, nextval())
 
-                 setTimeout(function() { graph.addLink(
-                  arrayItem.Actor1Name
-                 ,arrayItem.Site
-                 ,3); keepNodesOnTop(); }, nextval());
-               }
-             }
+		   if (Number(arrayItem.Avgtone) === 0) {
+				   setTimeout(function() { graph.addNode(arrayItem.Site+"=","GREY",vSize); keepNodesOnTop(); }, nextval())
+				   setTimeout(function() { graph.addLink(arrayItem.Site+"=",arrayItem.Actor1Name,Math.abs(arrayItem.Avgtone)); keepNodesOnTop(); }, nextval())
+			   if (arrayItem.Actor2Name!==undefined) {
+			     setTimeout(function() { graph.addNode(arrayItem.Actor2Name,"YELLOW",vSize); keepNodesOnTop(); }, nextval())
+			     setTimeout(function() { graph.addLink(arrayItem.Site+"=",arrayItem.Actor2Name,Math.abs(arrayItem.Avgtone)); keepNodesOnTop(); }, nextval())
+			   }
+		   }
 
-             if (arrayItem.Actor1Code>"" && arrayItem.Actor1Name>"" && arrayItem.Actor2Name>"" && arrayItem.Actor1CountryCode>"") {
+		   if (Number(arrayItem.Avgtone) < 0) {
+				setTimeout(function() { graph.addNode(arrayItem.Site+"-","RED",vSize); keepNodesOnTop(); }, nextval())
+				setTimeout(function() { graph.addLink(arrayItem.Site+"-",arrayItem.Actor1Name,Math.abs(arrayItem.Avgtone)); keepNodesOnTop(); }, nextval())
 
-               setTimeout(function() { graph.addNode(
-               arrayItem.Actor2Name
-               ,nodecolor(arrayItem.Avgtone)
-               ,arrayItem.Actor1Code
-               ,nowProcessing
-               ); keepNodesOnTop(); }, nextval());
+			   if (arrayItem.Actor2Name!==undefined) {
+			     setTimeout(function() { graph.addNode(arrayItem.Actor2Name,"YELLOW",vSize); keepNodesOnTop(); }, nextval())
+			     setTimeout(function() { graph.addLink(arrayItem.Site+"-",arrayItem.Actor2Name,Math.abs(arrayItem.Avgtone)); keepNodesOnTop(); }, nextval())
+			   }
+		   }
 
-               setTimeout(function() { graph.addLink(
-                arrayItem.Actor1Name
-               ,arrayItem.Actor2Name
-               ,3); keepNodesOnTop(); }, nextval());
+		   if (Number(arrayItem.Avgtone) > 0) {
+			   setTimeout(function() { graph.addNode(arrayItem.Site+"+","GREEN",vSize); keepNodesOnTop(); }, nextval())
+			   setTimeout(function() { graph.addLink(arrayItem.Site+"+",arrayItem.Actor1Name,Math.abs(arrayItem.Avgtone)); keepNodesOnTop(); }, nextval())
+
+			   if (arrayItem.Actor2Name!==undefined) {
+			     setTimeout(function() { graph.addNode(arrayItem.Actor2Name,"YELLOW",vSize); keepNodesOnTop(); }, nextval())
+			     setTimeout(function() { graph.addLink(arrayItem.Site+"+",arrayItem.Actor2Name,Math.abs(arrayItem.Avgtone)); keepNodesOnTop(); }, nextval())
+			   }
+		   }
 
 
-             }
-           }
-       });
-  }
-
-
-
+		 }
+	  })
+    }
 
 function nextval()
         {
@@ -660,16 +658,17 @@ function nextval()
 
     function myGraph() {
         // Add and remove elements on the graph object
-        this.addNode = function (id,color,group,messageNumber) {
-            setCmdBox("Consumed message "+messageNumber+ "(of "+consumedMessages+" messages)")
-            //console.log("addNode: adding "+id+" group:"+group);
+
+        this.addNode = function (id,color,pSize) {
+            console.log("addNode: adding "+id+" of size "+pSize+" and color "+color);
+
             // MarkTeehan: do a duplicate check here
-            //console.log("(I) Duplicate check for "  +id+" is #"+findNodeIndex(id)+"#");
+            console.log("(I) Duplicate check for "  +id+" is #"+findNodeIndex(id)+"# and size "+pSize);
+
             if (findNodeIndex(id) === undefined) {
-              nodes.push({"id": id,"color": color,"group":group});
-              //console.log("addNode: added "+id+" group:"+group);
-            } else {
-              //console.log("addNode: NOT added "+id+": existing node id is "+findNodeIndex(id));
+              if (checkOmitNode(id) === undefined) {
+                nodes.push({"id": id,"color": color,"size":pSize});
+              }
             }
             update();
         };
@@ -708,8 +707,13 @@ function nextval()
         };
 
         this.addLink = function (source, target, value) {
-            links.push({"source": findNode(source), "target": findNode(target), "value": value});
-            update();
+            console.log("ADDLINK: "+source+" and "+target)
+            if (checkOmitNode(source) === undefined) {
+              if (checkOmitNode(target) === undefined) {
+                links.push({"source": findNode(source), "target": findNode(target), "value": value});
+                update();
+              }
+            }
         };
 
         var findNode = function (id) {
@@ -727,6 +731,16 @@ function nextval()
             }
             ;
         };
+
+        var checkOmitNode = function (id) {
+            for (var i = 0; i < omitNodes.length; i++) {
+                if (omitNodes[i] == id) {
+                    return "OMIT";
+                }
+            }
+            ;
+        };
+
 
         // set up the D3 visualisation in the specified element
         var w = 1200,
@@ -795,10 +809,8 @@ function nextval()
                     .call(force.drag);
 
             nodeEnter.append("svg:circle")
-                    .attr("r", 12)
-                    .attr("id", function (d) {
-                        return "Node;" + d.id;
-                    })
+                    .attr("r",  function (d) { return  d.size;})
+                    .attr("id", function (d) { return "Node;" + d.id;})
                     .attr("class", "nodeStrokeClass")
 //                    .attr("fill", function(d) { return color(d.id); });
                     .attr("fill", function(d) { return d.color });
@@ -836,10 +848,9 @@ function nextval()
             force
                     //.gravity(.00001)
                     .gravity(0)
-                    .charge(-10000)
-                    .friction(0.0006)
-                    //.linkDistance( function(d) { return d.value * 10 } )
-                    .linkDistance(100)
+                    .charge(-30000)
+                    .friction(0.006)
+                    .linkDistance( function(d) { return d.value * 50 } )
                     .size([w, h])
                     .start();
         };
@@ -876,8 +887,8 @@ function startHere()
     // Confluent rest-api: query the Topics to find the latest one
     if (api == "v1") {
       AutoOffsetReset="smallest";  //v1="smallest", v2="earliest"
-      topic="GDELT_EVENT02"
-      findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
+      topic="GDELT_201807_SGP"
+      //findLatestTopic(consumerInstanceName,format, api, v1_getTopicRecords)
     } else {
       createConsumerInstance(consumerInstanceName,format, api, v2_createConsumerSubscription)
     }
